@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
 <title>HOME PAGE</title>
@@ -7,9 +7,55 @@
 <body>
 	<h3>YOU'RE IN!</h3>
 	<!-- list hosted meetings -->
-
+	<h4>Here are the meeting you hosted</h4>
+	<table border ="1">
+		<thead>
+			<th>TITLE</th>
+			<th>TIME</th>
+			<th>DURATION</th>
+			<th>MAX PARTICIPANTS</th>
+		</thead>
+		
+		<tbody th:remove="all-but-first">
+			<tr>
+				<td>CIAO</td>
+				<td>CIAO</td>
+				<td>CIAO</td>
+				<td>CIAO</td>
+			</tr>
+			
+			<tr>
+				<td>BYE</td>
+				<td>BYE</td>
+				<td>BYE</td>
+				<td>BYE</td>
+			</tr>
+		</tbody>
+	</table>
+	
 	<!-- list meetings to attend -->
-
+	<h4>Here are the meeting you have been invited to</h4>
+	<table border ="1">
+		<thead>
+			<th>TITLE</th>
+			<th>TIME</th>
+			<th>DURATION</th>
+		</thead>
+		<tbody th:remove="all-but-first">
+			<tr>
+				<td>CIAO</td>
+				<td>CIAO</td>
+				<td>CIAO</td>
+			</tr>
+			<tr>
+				<td>BYE</td>
+				<td>BYE</td>
+				<td>BYE</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<h4>Create a new meeting</h4>
 	<form id="createMeetingForm" method="post" action="createMeeting.php">
 		Title <input type="text" name="meetingTitle"/><br>
 		Date <input type="date" name="meetingDate"/><br>

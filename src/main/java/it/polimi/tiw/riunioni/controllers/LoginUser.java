@@ -78,7 +78,7 @@ public class LoginUser extends HttpServlet {
 			templateEngine.process(path, ctx, response.getWriter());
 		} else {
 			request.getSession().setAttribute("user", authEsit);
-			path = getServletContext().getContextPath() + "/home.jsp";
+			path = getServletContext().getContextPath() + "/home.html";
 			response.sendRedirect(path);
 		}
 	}
