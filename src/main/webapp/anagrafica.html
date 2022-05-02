@@ -5,21 +5,26 @@
 <title>ANAGRAFICA</title>
 </head>
 <body>
-	<form method = "post" action = "hostMeeting">
-		<input type="radio" name="users" value="GIOVANNI"/>
-			<label for="GIOVANNI">GIOVANNI</label><br>
-		
-		<input type="radio" name="users" value="RICCARDO" id="RICCARDO"/>
-			<label for="RICCARDO" >RICCARDO</label><br>
-			
-		<input type="radio" name="users" value="FABIO"  id="FABIO"/>
-			<label for="FABIO">FABIO</label><br>
-		
-		<input type="radio" name="users" value="FRANCESCO" id="FRANCESCO"/>
-			<label for="FRANCESCO">FRANCESCO</label><br>
-		
-		<input type="radio" name="users" value="CRISTIANA" id="CRISTIANA"/>
-			<label for="CRISTIANA">CRISTIANA</label><br>
-	</form>
+	<div th:switch="${session.noLogin}">
+		<h1 th:case="${true}" th:text="${errorNoLogin}" class="errorMessage">This is the error message you get if trying to access the page while not logged in</h1>
+		<div th:case="${false}" class="mainContentContainer">
+			<form method = "post" action = "hostMeeting">
+				<input type="radio" name="users" value="GIOVANNI"/>
+				<label for="GIOVANNI">GIOVANNI</label><br>
+				
+				<input type="radio" name="users" value="RICCARDO" id="RICCARDO"/>
+				<label for="RICCARDO" >RICCARDO</label><br>
+					
+				<input type="radio" name="users" value="FABIO"  id="FABIO"/>
+				<label for="FABIO">FABIO</label><br>
+				
+				<input type="radio" name="users" value="FRANCESCO" id="FRANCESCO"/>
+				<label for="FRANCESCO">FRANCESCO</label><br>
+				
+				<input type="radio" name="users" value="CRISTIANA" id="CRISTIANA"/>
+				<label for="CRISTIANA">CRISTIANA</label><br>
+			</form>
+		</div>
+	</div>
 </body>
 </html>

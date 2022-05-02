@@ -16,12 +16,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import it.polimi.tiw.riunioni.DAO.UserDAO;
+import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
+import it.polimi.tiw.riunioni.utils.SanitizeUtils;
 
 @WebServlet("/register")
 public class RegisterUser extends HttpServlet {
@@ -45,24 +48,25 @@ public class RegisterUser extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String username = request.getParameter("username");
-		String email = request.getParameter("email");
+		String path = "register.html";
+		ServletContext servletContext = getServletContext();
+		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		
+		String username = SanitizeUtils.sanitizeString(request.getParameter("username"));
+		String email = SanitizeUtils.sanitizeString(request.getParameter("email"));
 		String password = request.getParameter("password");
-		String confirmation = request.getParameter("passwordConfirmation");
+		String confirmation = SanitizeUtils.sanitizeString(request.getParameter("passwordConfirmation"));
+		RegisterErrorBean regErrBean = new RegisterErrorBean();
+		
+		// fill also login bean to avoid crashes
+		ctx.setVariable("errorMsg", "");
 		
 		if(username == null || username.isEmpty() || email == null || email.isEmpty() || password == null 
 				|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
-			return;
-		}
-		
-		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid email address");
-			return;
-		}
-		
-		if(!password.equals(confirmation)) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "passwords don't match");
+			regErrBean.setMissingEntries("missing fields");
+			ctx.setVariable("error", regErrBean);
+			templateEngine.process(path, ctx, response.getWriter());
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
 			return;
 		}
 		
@@ -76,7 +80,26 @@ public class RegisterUser extends HttpServlet {
 		}
 		
 		if(isUsernameDuplicate) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "the username already exists");
+			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "the username already exists");
+			regErrBean.setNotUniqueUsername("the username already exists");
+			ctx.setVariable("error", regErrBean);
+			templateEngine.process(path, ctx, response.getWriter());
+			return;
+		}
+		
+		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid email address");
+			regErrBean.setInvalidEmail("invalid email address");
+			ctx.setVariable("error", regErrBean);
+			templateEngine.process(path, ctx, response.getWriter());
+			return;
+		}
+		
+		if(!password.equals(confirmation)) {
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "passwords don't match");
+			regErrBean.setPasswordMismatch("passwords don't match");
+			ctx.setVariable("error", regErrBean);
+			templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
@@ -95,7 +118,7 @@ public class RegisterUser extends HttpServlet {
 			return;
 		}
 		
-		//response.sendRedirect("home.jsp");
+		response.sendRedirect("home.html");
 	}
 	
 	public void destroy() {

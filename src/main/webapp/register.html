@@ -11,13 +11,16 @@
 		Password <input type="text" name="password" /> <br />
 		<input type="submit" />
 	</form>
+	<span th:text="${errorMsg}" class="errorMessage">Login error messages go here</span>
 
 	<h3>REGISTRATI</h3>
 	<form id="registerForm" method="post" action="register">
-		Username <input type="text" name="username" /> <br />
-		E-mail <input type="text" name="email" /> <br />
-		Password <input type="text" name="password" /> <br />
-		Repeat Password <input type="text" name="passwordConfirmation" /> <br /> <input type="submit" />
+		Username <input type="text" name="username"/><span th:text="${error.notUniqueUsername}" class="errorMessage">Duplicate username error</span><br/>
+		E-mail <input type="text" name="email"/><span th:text="${error.invalidEmail}" class="errorMessage">Invalid email error</span><br/>
+		Password <input type="text" name="password"/><br/>
+		Repeat Password <input type="text" name="passwordConfirmation" /><span th:text="${error.passwordMismatch}" class="errorMessage">Non-matching passwords error</span><br/>
+		<input type="submit"/>
 	</form>
+	<span th:text="${error.missingEntries}" class="errorMessage">Signup error messages go here</span>
 </body>
 </html>

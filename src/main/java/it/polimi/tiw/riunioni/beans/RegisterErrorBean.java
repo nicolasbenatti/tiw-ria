@@ -1,19 +1,47 @@
 package it.polimi.tiw.riunioni.beans;
 
 public class RegisterErrorBean {
-	private String notUniqueUsername = "Username già impiegato";
-	private String invalidEmail = "Indirizzo mail malformato";
-	private String passwordMismatch = "Le password non corrispondono";
+	private String notUniqueUsername;
+	private String invalidEmail;
+	private String passwordMismatch;
+	private String missingEntries;
 	
-	private String getNotUniqueUsername() {
+	public RegisterErrorBean() {
+		this.notUniqueUsername = "";
+		this.invalidEmail ="";
+		this.passwordMismatch = "";
+		this.missingEntries = "";
+	}
+	
+	public void setNotUniqueUsername(String alert) {
+		this.notUniqueUsername = alert;
+	}
+	
+	public void setInvalidEmail(String alert) {
+		this.invalidEmail = alert;
+	}
+	
+	public void setPasswordMismatch(String alert) {
+		this.passwordMismatch = alert;
+	}
+	
+	public void setMissingEntries(String alert) {
+		this.missingEntries = alert;
+	}
+	
+	public String getNotUniqueUsername() {
 		return this.notUniqueUsername;
 	}
 	
-	private String getInvalidEmail() {
+	public String getInvalidEmail() {
 		return this.invalidEmail;
 	}
 	
-	private String getPasswordMismatch() {
+	public String getPasswordMismatch() {
 		return this.passwordMismatch;
+	}
+	
+	public String getMissingEntries() {
+		return this.missingEntries;
 	}
 }

@@ -20,6 +20,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import it.polimi.tiw.riunioni.DAO.UserDAO;
+import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 import it.polimi.tiw.riunioni.utils.SanitizeUtils;
@@ -46,15 +47,24 @@ public class LoginUser extends HttpServlet {
     
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String username, password;
+		String path = "register.html";
+		ServletContext servletContext = getServletContext();
+		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
+		
+		// fill also the signup bean to avoid crashes
+		RegisterErrorBean regErrBean = new RegisterErrorBean();
+		ctx.setVariable("error", regErrBean);
 		
 		try {
 			username = SanitizeUtils.sanitizeString(request.getParameter("username"));
-			password = SanitizeUtils.sanitizeString(request.getParameter("password"));
+			password = request.getParameter("password");
 			System.out.println(username + ", " + password);
 			if(username == null || username.isEmpty() || password == null || password.isEmpty())
 				throw new Exception("Missing or empty credentials");
 		} catch(Exception e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing credentials");
+			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Missing or empty credentials");
+			ctx.setVariable("errorMsg", "Missing or empty credentials");
+			templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
@@ -68,16 +78,14 @@ public class LoginUser extends HttpServlet {
 			return;
 		}
 		
-		String path;
 		if(authEsit == null) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Incorrect username or password");
-			ServletContext servletContext = getServletContext();
-			final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-			ctx.setVariable("errorMsg", "Incorrect username or password");
+			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Incorrect username or password");
+			ctx.setVariable("errorMsg", "Wrong username or password");
 			path = "/register.html";
 			templateEngine.process(path, ctx, response.getWriter());
 		} else {
 			request.getSession().setAttribute("user", authEsit);
+			//request.getSession().setAttribute("noLogin", false);
 			path = getServletContext().getContextPath() + "/home.html";
 			response.sendRedirect(path);
 		}
