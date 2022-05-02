@@ -127,6 +127,7 @@ public class UserDAO {
 				rset.next();
 				
 				UserBean user = new UserBean();
+				user.setId(rset.getInt("user_id"));
 				user.setUsername(rset.getString("username"));
 				user.setEmail(rset.getString("email"));
 				user.setPassword(rset.getString("user_password"));

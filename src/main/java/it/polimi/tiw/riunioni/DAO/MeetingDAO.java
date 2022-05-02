@@ -35,7 +35,7 @@ public class MeetingDAO {
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setTime(resSet.getTime("meeting_time"));
 				toAdd.setDate(resSet.getDate("meeting_date"));
-				toAdd.setTime(resSet.getTime("duration"));
+				toAdd.setDuration(resSet.getTime("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
 				res.add(toAdd);
@@ -67,7 +67,7 @@ public class MeetingDAO {
 		
 		try {
 			pstatement = this.conn.prepareStatement(query);
-			pstatement.setInt(0, userid);
+			pstatement.setInt(1, userid);
 			
 			resSet = pstatement.executeQuery();
 			while(resSet.next()) {
@@ -75,7 +75,7 @@ public class MeetingDAO {
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setTime(resSet.getTime("meeting_time"));
 				toAdd.setDate(resSet.getDate("meeting_date"));
-				toAdd.setTime(resSet.getTime("duration"));
+				toAdd.setDuration(resSet.getTime("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
 				res.add(toAdd);
@@ -105,11 +105,11 @@ public class MeetingDAO {
 		
 		try {
 			pstatement = this.conn.prepareStatement(query);
-			pstatement.setString(0, meeting.getTitle());
-			pstatement.setDate(1, meeting.getDate());
-			pstatement.setTime(2, meeting.getTime());
-			pstatement.setTime(3, meeting.getDuration());
-			pstatement.setInt(4, meeting.getMaxParticipants());
+			pstatement.setString(1, meeting.getTitle());
+			pstatement.setDate(2, meeting.getDate());
+			pstatement.setTime(3, meeting.getTime());
+			pstatement.setTime(4, meeting.getDuration());
+			pstatement.setInt(5, meeting.getMaxParticipants());
 			
 			pstatement.executeUpdate();
 		} catch(SQLException e) {
@@ -129,8 +129,8 @@ public class MeetingDAO {
 		
 		try {
 			pstatement = this.conn.prepareStatement(query);
-			pstatement.setInt(0, userId);
-			pstatement.setInt(1, meetingId);
+			pstatement.setInt(1, userId);
+			pstatement.setInt(2, meetingId);
 			
 			pstatement.executeUpdate();
 		} catch(SQLException e) {

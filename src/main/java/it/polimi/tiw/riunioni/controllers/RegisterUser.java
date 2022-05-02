@@ -65,8 +65,7 @@ public class RegisterUser extends HttpServlet {
 				|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
 			regErrBean.setMissingEntries("missing fields");
 			ctx.setVariable("error", regErrBean);
-			templateEngine.process(path, ctx, response.getWriter());
-			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
+			this.templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
@@ -80,26 +79,23 @@ public class RegisterUser extends HttpServlet {
 		}
 		
 		if(isUsernameDuplicate) {
-			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "the username already exists");
 			regErrBean.setNotUniqueUsername("the username already exists");
 			ctx.setVariable("error", regErrBean);
-			templateEngine.process(path, ctx, response.getWriter());
+			this.templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
 		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
-			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "invalid email address");
 			regErrBean.setInvalidEmail("invalid email address");
 			ctx.setVariable("error", regErrBean);
-			templateEngine.process(path, ctx, response.getWriter());
+			this.templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
 		if(!password.equals(confirmation)) {
-			//response.sendError(HttpServletResponse.SC_BAD_REQUEST, "passwords don't match");
 			regErrBean.setPasswordMismatch("passwords don't match");
 			ctx.setVariable("error", regErrBean);
-			templateEngine.process(path, ctx, response.getWriter());
+			this.templateEngine.process(path, ctx, response.getWriter());
 			return;
 		}
 		
@@ -118,7 +114,10 @@ public class RegisterUser extends HttpServlet {
 			return;
 		}
 		
-		response.sendRedirect("home.html");
+		ctx.setVariable("successfulSignup", "Registration successful, you can now login");
+		ctx.setVariable("error", regErrBean);
+		this.templateEngine.process(path, ctx, response.getWriter());
+		//response.sendRedirect("register.html");
 	}
 	
 	public void destroy() {

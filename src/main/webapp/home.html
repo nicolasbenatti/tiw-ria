@@ -15,6 +15,7 @@
 				<thead>
 					<tr>
 						<th>TITLE</th>
+						<th>DATE</th>
 						<th>TIME</th>
 						<th>DURATION</th>
 						<th>MAX PARTICIPANTS</th>
@@ -22,11 +23,12 @@
 				</thead>
 				
 				<tbody th:remove="all-but-first">
-					<tr>
-						<td>CIAO</td>
-						<td>CIAO</td>
-						<td>CIAO</td>
-						<td>CIAO</td>
+					<tr th:each="meeting : ${hostedMeetings}">
+						<td th:text="${meeting.title}">CIAO</td>
+						<td th:text="${meeting.date}">CIAO</td>
+						<td th:text="${meeting.time}">CIAO</td>
+						<td th:text="${meeting.duration}">CIAO</td>
+						<td th:text="${meeting.maxParticipants}">CIAO</td>
 					</tr>
 					
 					<tr>
@@ -44,17 +46,20 @@
 				<thead>
 					<tr>
 						<th>TITLE</th>
+						<th>DATE</th>
 						<th>TIME</th>
 						<th>DURATION</th>
 					</tr>
 				</thead>
 				<tbody th:remove="all-but-first">
-					<tr>
-						<td>CIAO</td>
-						<td>CIAO</td>
-						<td>CIAO</td>
+					<tr th:each="meeting : ${meetingsToAttend}">
+						<td th:text="${meeting.title}">CIAO</td>
+						<td th:text="${meeting.date}">CIAO</td>
+						<td th:text="${meeting.time}">CIAO</td>
+						<td th:text="${meeting.duration}">CIAO</td>
 					</tr>
 					<tr>
+						<td>BYE</td>
 						<td>BYE</td>
 						<td>BYE</td>
 						<td>BYE</td>

@@ -86,7 +86,7 @@ public class LoginUser extends HttpServlet {
 		} else {
 			request.getSession().setAttribute("user", authEsit);
 			//request.getSession().setAttribute("noLogin", false);
-			path = getServletContext().getContextPath() + "/home.html";
+			path = getServletContext().getContextPath() + "/goToHome";
 			response.sendRedirect(path);
 		}
 	}

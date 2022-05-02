@@ -25,7 +25,6 @@ import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 @WebServlet("/register.html")
 public class RegisterPageController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private Connection conn;   
     private TemplateEngine templateEngine;   
 	
     public RegisterPageController() {
@@ -34,7 +33,6 @@ public class RegisterPageController extends HttpServlet {
     
     public void init() throws ServletException {
     	ServletContext servletContext = getServletContext();
-		this.conn = ConnectionHandler.getConnection(servletContext);
 		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
 		templateResolver.setTemplateMode(TemplateMode.HTML);
 		this.templateEngine = new TemplateEngine();
