@@ -82,7 +82,7 @@ public class LoginUser extends HttpServlet {
 			//response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Incorrect username or password");
 			ctx.setVariable("errorMsg", "Wrong username or password");
 			path = "/register.html";
-			templateEngine.process(path, ctx, response.getWriter());
+			this.templateEngine.process(path, ctx, response.getWriter());
 		} else {
 			request.getSession().setAttribute("user", authEsit);
 			//request.getSession().setAttribute("noLogin", false);

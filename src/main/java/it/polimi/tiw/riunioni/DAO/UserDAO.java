@@ -32,7 +32,7 @@ public class UserDAO {
 				UserBean user = new UserBean();
 				user.setUsername(res.getString("username"));
 				user.setEmail(res.getString("email"));
-				user.setPassword(res.getString("password"));
+				user.setPassword(res.getString("user_password"));
 				
 				users.add(user);
 			}

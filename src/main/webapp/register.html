@@ -6,7 +6,7 @@
 </head>
 <body>
 	<h3>LOGIN</h3>
-	<form id="loginForm" method="post" action="login">
+	<form id="loginForm" method="POST" action="login">
 		Username <input type="text" name="username" /> <br />
 		Password <input type="text" name="password" /> <br />
 		<input type="submit" />
@@ -14,7 +14,7 @@
 	<span th:text="${errorMsg}" class="errorMessage">Login error messages go here</span>
 
 	<h3>REGISTRATI</h3>
-	<form id="registerForm" method="post" action="register">
+	<form id="registerForm" method="POST" action="register">
 		Username <input type="text" name="username"/><span th:text="${error.notUniqueUsername}" class="errorMessage">Duplicate username error</span><br/>
 		E-mail <input type="text" name="email"/><span th:text="${error.invalidEmail}" class="errorMessage">Invalid email error</span><br/>
 		Password <input type="text" name="password"/><br/>

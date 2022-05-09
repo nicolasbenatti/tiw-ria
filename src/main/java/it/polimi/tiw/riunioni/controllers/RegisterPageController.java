@@ -19,7 +19,7 @@ import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
 /**
- * This Servlet has to sole function to process the page template
+ * This Servlet has the sole function to process the page template
  * filling in blank values
  */
 @WebServlet("/register.html")

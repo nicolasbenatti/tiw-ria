@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
+import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -106,7 +107,7 @@ public class MeetingDAO {
 		try {
 			pstatement = this.conn.prepareStatement(query);
 			pstatement.setString(1, meeting.getTitle());
-			pstatement.setDate(2, meeting.getDate());
+			pstatement.setObject(2, meeting.getDate().toInstant().atZone(ZoneId.of("Europe/Rome")).toLocalDate());
 			pstatement.setTime(3, meeting.getTime());
 			pstatement.setTime(4, meeting.getDuration());
 			pstatement.setInt(5, meeting.getMaxParticipants());
@@ -143,4 +144,37 @@ public class MeetingDAO {
 			}
 		}
 	}
+	
+	
+	public int getMaxParticipants(int meetingId) throws SQLException {
+		int result;
+		ResultSet resSet = null;
+		String query = "SELECT max_participants FROM meetings WHERE meeting_id= ?";
+		PreparedStatement pstatement = null;
+		
+		try {
+			pstatement = this.conn.prepareStatement(query);
+			pstatement.setInt(1, meetingId);
+			
+			resSet = pstatement.executeQuery();
+			result = resSet.getInt("max_participants");
+		} catch(SQLException e) {
+			throw new SQLException(e);
+		} finally {
+			try {
+				resSet.close();
+			} catch(Exception e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				pstatement.close();
+			} catch(Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+		return result;
+	}
+	
 }

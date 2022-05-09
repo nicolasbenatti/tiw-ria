@@ -68,12 +68,12 @@
 			</table>
 			
 			<h4>Create a new meeting</h4>
-			<form id="createMeetingForm" method="post" action="createMeeting">
-				Title <input type="text" name="meetingTitle"/><br>
-				Date <input type="date" name="meetingDate"/><br>
-				At <input type="time" name="meetingTime"/><br>
-				Duration <input type="time" name="meetingDuration"/><br>
-				Participants limit <input type="number" name="maxParticipants"/><br>
+			<form id="createMeetingForm" method="POST" action="createMeeting">
+				Title <input type="text" name="meetingTitle" required/><br>
+				Date <input type="date" name="meetingDate" required/><br>
+				At <input type="time" name="meetingTime" th:attr="min=${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" placeholder="yyyy-mm-dd" required/><br>
+				Duration <input type="time" name="meetingDuration" required/><br>
+				Participants limit <input type="number" name="maxParticipants" required/><br>
 				<input type="submit"/> 
 			</form>
 			<span th:text="${errorMsg}"> missing fields message goes here </span> <br>
