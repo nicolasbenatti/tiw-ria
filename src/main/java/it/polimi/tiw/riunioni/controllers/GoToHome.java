@@ -10,7 +10,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * Redirect to the home page
  */
-@WebServlet("/GoToHome")
+@WebServlet("/goToHome")
 public class GoToHome extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	
@@ -21,7 +21,8 @@ public class GoToHome extends HttpServlet {
     
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		
+		String path = getServletContext().getContextPath() + "/home.html";
+		response.sendRedirect(path);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

@@ -36,7 +36,7 @@ public class MeetingDAO {
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setTime(resSet.getTime("meeting_time"));
 				toAdd.setDate(resSet.getDate("meeting_date"));
-				toAdd.setDuration(resSet.getTime("duration"));
+				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
 				res.add(toAdd);
@@ -76,7 +76,7 @@ public class MeetingDAO {
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setTime(resSet.getTime("meeting_time"));
 				toAdd.setDate(resSet.getDate("meeting_date"));
-				toAdd.setDuration(resSet.getTime("duration"));
+				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
 				res.add(toAdd);
@@ -109,7 +109,7 @@ public class MeetingDAO {
 			pstatement.setString(1, meeting.getTitle());
 			pstatement.setObject(2, meeting.getDate().toInstant().atZone(ZoneId.of("Europe/Rome")).toLocalDate());
 			pstatement.setTime(3, meeting.getTime());
-			pstatement.setTime(4, meeting.getDuration());
+			pstatement.setInt(4, meeting.getDuration());
 			pstatement.setInt(5, meeting.getMaxParticipants());
 			
 			pstatement.executeUpdate();

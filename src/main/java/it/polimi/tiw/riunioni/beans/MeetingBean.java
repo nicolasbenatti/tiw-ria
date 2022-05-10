@@ -7,8 +7,16 @@ public class MeetingBean {
 	private String title;
 	private Date date;
 	private Time time;
-	private Time duration;
+	private int duration;
 	private int maxParticipants;
+	
+	public MeetingBean() {
+		this.title = "";
+		this.maxParticipants = 0;
+		this.date = null;
+		this.time = null;
+		this.duration = 0;
+	}
 	
 	public String getTitle() {
 		return this.title;
@@ -22,7 +30,7 @@ public class MeetingBean {
 		return this.time;
 	}
 	
-	public Time getDuration() {
+	public int getDuration() {
 		return this.duration;
 	}
 	
@@ -42,7 +50,7 @@ public class MeetingBean {
 		this.time = time;
 	}
 	
-	public void setDuration(Time duration) {
+	public void setDuration(int duration) {
 		this.duration = duration;
 	}
 	

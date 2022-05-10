@@ -101,20 +101,8 @@ public class CreateMeeting extends HttpServlet {
 			return;
 		}
 		
-		//path = "anagrafica.html";
-		
-		//ctx.setVariable("meetingNameTitle", title);
-		//ctx.setVariable("meetingTime", meetingTime);
-		//ctx.setVariable("meetingDuration", meetingDuration);
-		//ctx.setVariable("meetingDate", meetingDate);
-		//ctx.setVariable("meetingMatParticipants", maxP);
-		//this.templateEngine.process(path, ctx, response.getWriter()); // è un redirect
-		path = getServletContext().getContextPath() +  "/inviteToMeeting";
-		response.setHeader("meetingTitle", title);
-		response.setHeader("meetingTime", meetingTime.toString());
-		response.setHeader("meetingDuration", meetingDuration.toString());
-		response.setHeader("meetingDate", meetingDate.toString());
-		response.setIntHeader("meetingMaxParticipants", maxP);
-		response.sendRedirect(path);
+		path = getServletContext().getContextPath() + "/inviteToMeeting";
+		response.sendRedirect(path + "?meetingtitle=" + title+"&meetingtime=" + meetingTime.toString() + "&meetingduration=" + meetingDuration.toString()
+				+ "&meetingdate=" + meetingDate.toString() + "&maxparticipants=" + maxP);
 	}
 }

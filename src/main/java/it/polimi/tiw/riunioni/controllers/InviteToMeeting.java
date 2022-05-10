@@ -3,8 +3,11 @@ package it.polimi.tiw.riunioni.controllers;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -19,7 +22,9 @@ import org.thymeleaf.context.WebContext;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
+import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.DAO.UserDAO;
+import it.polimi.tiw.riunioni.beans.MeetingBean;
 import it.polimi.tiw.riunioni.beans.SelectedUserBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
@@ -47,14 +52,14 @@ public class InviteToMeeting extends HttpServlet {
     }
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String path = "anagrafica.html";
 		ServletContext servletContext = getServletContext();
 		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
 		
+		// distinguish between the first time you land on the page, and the retries
 		String[] selection = request.getParameterValues("users");
 		if(selection == null) {
 			selection = new String[0];
-			System.out.println("absent parameters");
+			System.out.println("no user selected");
 		} else {
 			System.out.println("******");
 			for(String sel : selection)
@@ -69,7 +74,6 @@ public class InviteToMeeting extends HttpServlet {
 		try {
 			users = dao.getAllUsers();
 			for(UserBean b: users) {
-				//System.out.println(b.getUsername());
 				SelectedUserBean tmp= new SelectedUserBean();
 				if(selectedNames.contains(b.getUsername()))
 					tmp.setSelected(true);
@@ -83,8 +87,38 @@ public class InviteToMeeting extends HttpServlet {
 			e.printStackTrace();
 		}
 		
+		MeetingBean newMeeting = new MeetingBean();
+		newMeeting.setTitle(request.getParameter("meetingtitle"));
+		newMeeting.setMaxParticipants(Integer.parseInt(request.getParameter("maxparticipants")));
+		
+		int maxP =Integer.parseInt(request.getParameter("maxparticipants"));
+		
+		if(selectedUsers.size() > maxP) {
+			if(attempts == 3) {
+				attempts = 0;
+				String path = getServletContext().getContextPath() + "/cancellazione.html";
+				response.sendRedirect(path);
+			} else
+				attempts++;
+		}
+		
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
+		Date meetingDate = null;
+		Date meetingTime = null;
+		Date meetingDuration = null;
+		
+		/*try {
+			meetingDate = sdf.parse(request.getParameter("meetingdate"));
+			meetingTime = sdf.parse(request.getParameter("meetingtime"));
+			meetingDuration = sdf.parse(request.getParameter("meetingduration"));
+		} catch (ParseException e) {
+			e.printStackTrace();
+			return;
+		}*/
+		ctx.setVariable("meetingTitle", request.getParameter("meetingtitle"));
+		ctx.setVariable("newMeeting", newMeeting);
 		ctx.setVariable("selectedUsers", selectedUsers);
-		this.templateEngine.process(path, ctx, response.getWriter());
+		this.templateEngine.process("anagrafica.html", ctx, response.getWriter());
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
