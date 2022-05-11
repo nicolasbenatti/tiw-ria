@@ -1,15 +1,12 @@
 package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
 import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.UnavailableException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -117,7 +114,6 @@ public class RegisterUser extends HttpServlet {
 		ctx.setVariable("successfulSignup", "Registration successful, you can now login");
 		ctx.setVariable("error", regErrBean);
 		this.templateEngine.process(path, ctx, response.getWriter());
-		//response.sendRedirect("register.html");
 	}
 	
 	public void destroy() {

@@ -1,7 +1,6 @@
 package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
-import java.sql.Connection;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -16,7 +15,6 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
-import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
 /**
  * This Servlet has the sole function to process the page template

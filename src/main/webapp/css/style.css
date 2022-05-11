@@ -1,5 +1,6 @@
 @charset "UTF-8";
 
-.checked {
-	
+.error {
+	text-color: red;
+	font-weight: 600;
 }

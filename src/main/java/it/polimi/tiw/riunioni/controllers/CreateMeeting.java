@@ -2,14 +2,12 @@ package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
 import java.sql.Connection;
-import java.sql.Time;
+import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Date;
+
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
@@ -28,7 +26,7 @@ import it.polimi.tiw.riunioni.utils.SanitizeUtils;
 @WebServlet("/createMeeting")
 public class CreateMeeting extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private Connection conn;   
+	private Connection conn = null;   
     private TemplateEngine templateEngine;
     
     public CreateMeeting() {
@@ -45,16 +43,16 @@ public class CreateMeeting extends HttpServlet {
 		templateResolver.setSuffix(".html");
     }
     
-	/*protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		response.getWriter().append("Served at: ").append(request.getContextPath());
-	}*/
+	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+		doPost(request, response);
+	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String path = "home.html";
 		ServletContext servletContext = getServletContext(); // contesto in cui lavora il servlet
 		final WebContext ctx = new WebContext(request,response, servletContext,request.getLocale()); //oggetto in cui metti i dati che servono al template
 		
-		String title, date, time,duration, maxParticipants;
+		String title, date, time, duration, maxParticipants;
 		
 		try{
 			title = SanitizeUtils.sanitizeString(request.getParameter("meetingTitle"));
@@ -62,8 +60,8 @@ public class CreateMeeting extends HttpServlet {
 			time = SanitizeUtils.sanitizeString(request.getParameter("meetingTime"));
 			duration = SanitizeUtils.sanitizeString(request.getParameter("meetingDuration"));
 			maxParticipants = SanitizeUtils.sanitizeString(request.getParameter("maxParticipants"));
-			if(title==null || title.isEmpty() || date==null || date.isEmpty() || time==null || time.isEmpty() 
-					|| duration==null || duration.isEmpty() || maxParticipants==null || maxParticipants.isEmpty())
+			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty() || time == null || time.isEmpty()
+					|| maxParticipants == null || maxParticipants.isEmpty())
 				throw new Exception("Missing fields");
 		}catch(Exception e) {
 			ctx.setVariable("errorMsg", e.getMessage()); 
@@ -71,17 +69,20 @@ public class CreateMeeting extends HttpServlet {
 			return;
 		}
 		
-		Date meetingTime, meetingDuration;
+		System.out.println("FORM FIELDS:");
+		System.out.println(title);
+		System.out.println(date);
+		System.out.println(duration);
+		System.out.println(maxParticipants);
+		
 		Date meetingDate;
-		int maxP = 0;
+		int maxP = 0, meetingDuration = 0;
 		
 		try {
-			DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			meetingDate = (Date) sdf.parse(date);
+			DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			meetingDate = (Date) sdf.parse(date + " " + time);
+			meetingDuration = 90;
 			maxP = Integer.parseInt(maxParticipants);
-			sdf = new SimpleDateFormat("HH:mm");
-			meetingTime = sdf.parse(time);
-			meetingDuration = sdf.parse(duration);
 		} catch(NumberFormatException e) {
 			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid number of participants");
 			e.printStackTrace();
@@ -102,7 +103,13 @@ public class CreateMeeting extends HttpServlet {
 		}
 		
 		path = getServletContext().getContextPath() + "/inviteToMeeting";
-		response.sendRedirect(path + "?meetingtitle=" + title+"&meetingtime=" + meetingTime.toString() + "&meetingduration=" + meetingDuration.toString()
-				+ "&meetingdate=" + meetingDate.toString() + "&maxparticipants=" + maxP);
+		response.sendRedirect(path + "?meetingtitle=" + title + "&meetingduration=" + meetingDuration
+				+ "&meetingdate=" + meetingDate.getTime() + "&maxparticipants=" + maxP);
+	}
+	
+	public void destroy() {
+		try {
+			ConnectionHandler.closeConnection(this.conn);
+		} catch (SQLException sqle) {}
 	}
 }

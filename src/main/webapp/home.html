@@ -2,7 +2,8 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
 <meta charset="UTF-8">
-<title>HOME PAGE</title>
+	<title>Home</title>
+	<link rel="stylesheet" type="text/css" media="all" href="/css/style.css" th:ref="@{/css/style.css}"/>
 </head>
 <body>
 	<div th:switch="${session.noLogin}">
@@ -14,28 +15,23 @@
 			<table border ="1">
 				<thead>
 					<tr>
-						<th>TITLE</th>
-						<th>DATE</th>
-						<th>TIME</th>
-						<th>DURATION</th>
-						<th>MAX PARTICIPANTS</th>
+						<th>Title</th>
+						<th>Date</th>
+						<th>Duration</th>
+						<th>Max # of guests allowed</th>
 					</tr>
 				</thead>
-				
 				<tbody th:remove="all-but-first">
 					<tr th:each="meeting : ${hostedMeetings}">
-						<td th:text="${meeting.title}">CIAO</td>
-						<td th:text="${meeting.date}">CIAO</td>
-						<td th:text="${meeting.time}">CIAO</td>
-						<td th:text="${meeting.duration}">CIAO</td>
+						<td th:text="${meeting.title}">foo</td>
+						<td th:text="${meeting.date}">foo</td>
+						<td th:text="${meeting.duration}">foo</td>
 						<td th:text="${meeting.maxParticipants}">10</td>
 					</tr>
-					
 					<tr>
-						<td>BYE</td>
-						<td>BYE</td>
-						<td>BYE</td>
-						<td>BYE</td>
+						<td>foo</td>
+						<td>foo</td>
+						<td>foo</td>
 						<td>15</td>
 					</tr>
 				</tbody>
@@ -46,35 +42,49 @@
 			<table border ="1">
 				<thead>
 					<tr>
-						<th>TITLE</th>
-						<th>DATE</th>
-						<th>TIME</th>
-						<th>DURATION</th>
+						<th>Title</th>
+						<th>Date</th>
+						<th>Duration</th>
 					</tr>
 				</thead>
 				<tbody th:remove="all-but-first">
 					<tr th:each="meeting : ${meetingsToAttend}">
-						<td th:text="${meeting.title}">CIAO</td>
-						<td th:text="${meeting.date}">CIAO</td>
-						<td th:text="${meeting.time}">CIAO</td>
-						<td th:text="${meeting.duration}">CIAO</td>
+						<td th:text="${meeting.title}">bar</td>
+						<td th:text="${meeting.date}">bar</td>
+						<td th:text="${meeting.duration}">bar</td>
 					</tr>
 					<tr>
-						<td>BYE</td>
-						<td>BYE</td>
-						<td>BYE</td>
-						<td>BYE</td>
+						<td>bar</td>
+						<td>bar</td>
+						<td>bar</td>
 					</tr>
 				</tbody>
 			</table>
 			
 			<h4>Create a new meeting</h4>
 			<form id="createMeetingForm" method="POST" action="createMeeting">
-				Title <input type="text" name="meetingTitle" required/><br>
-				Date <input type="date" name="meetingDate" required/><br>
-				At <input type="time" name="meetingTime" th:attr="min=${#dates.format(#dates.createNow(), 'yyyy-MM-dd')}" placeholder="yyyy-mm-dd" required/><br>
-				Duration <input type="time" name="meetingDuration" step="1" required/><br>
-				Participants limit <input type="number" name="maxParticipants" required/><br>
+				<table>
+					<tr>
+						<td><label>Title</label></td>
+						<td><input type="text" name="meetingTitle" required/></td>
+					</tr>
+					<tr>
+						<td><label>Date</label></td>
+						<td><input type="date" name="meetingDate" required/></td>
+					</tr>
+					<tr>
+						<td><label>Time</label></td>
+						<td><input type="time" name="meetingTime" required/></td>
+					</tr>
+					<tr>
+						<td><label>Duration</label></td>
+						<td><input type="time" name="meetingDuration" step="60" required/></td>
+					</tr>
+					<tr>
+						<td><label>Max # of guests</label></td>
+						<td><input type="number" name="maxParticipants" required/></td>
+					</tr>
+				</table>
 				<input type="submit"/> 
 			</form>
 			<span th:text="${errorMsg}"> missing fields message goes here </span> <br>

@@ -10,10 +10,11 @@ import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.mysql.cj.xdevapi.Statement;
+
 import it.polimi.tiw.riunioni.beans.MeetingBean;
 
 public class MeetingDAO {
-	
 	public Connection conn;
 	
 	public MeetingDAO(Connection dbConnection) {
@@ -34,8 +35,7 @@ public class MeetingDAO {
 			while(resSet.next()) {
 				MeetingBean toAdd = new MeetingBean();
 				toAdd.setTitle(resSet.getString("title"));
-				toAdd.setTime(resSet.getTime("meeting_time"));
-				toAdd.setDate(resSet.getDate("meeting_date"));
+				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
 				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
@@ -74,8 +74,7 @@ public class MeetingDAO {
 			while(resSet.next()) {
 				MeetingBean toAdd = new MeetingBean();
 				toAdd.setTitle(resSet.getString("title"));
-				toAdd.setTime(resSet.getTime("meeting_time"));
-				toAdd.setDate(resSet.getDate("meeting_date"));
+				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
 				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
@@ -100,17 +99,49 @@ public class MeetingDAO {
 		return res;
 	}
 	
+	public int getIdFromName(String name) throws SQLException {
+		String query = "SELECT meeting_id from meetings WHERE title = ?";
+		PreparedStatement pstatement = null;
+		ResultSet resSet = null;
+		int res = 0;
+		
+		try {
+			pstatement = this.conn.prepareStatement(query);
+			pstatement.setString(1, name);
+			
+			resSet = pstatement.executeQuery();
+			resSet.next();
+			res = resSet.getInt("meeting_id");
+		} catch(SQLException e) {
+			e.printStackTrace();
+			throw new SQLException(e);
+		} finally {
+			try {
+				resSet.close();
+			} catch(Exception e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				pstatement.close();
+			} catch(Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+		return res;
+	}
+	
 	public void hostMeeting(MeetingBean meeting) throws SQLException {
-		String query = "INSERT INTO meetings(title, meeting_date, meeting_time, duration, max_participants) VALUES(?, ?, ?, ?, ?)";
+		String query = "INSERT INTO meetings(title, meeting_date, duration, max_participants) VALUES(?, ?, ?, ?)";
 		PreparedStatement pstatement = null;
 		
 		try {
 			pstatement = this.conn.prepareStatement(query);
 			pstatement.setString(1, meeting.getTitle());
-			pstatement.setObject(2, meeting.getDate().toInstant().atZone(ZoneId.of("Europe/Rome")).toLocalDate());
-			pstatement.setTime(3, meeting.getTime());
-			pstatement.setInt(4, meeting.getDuration());
-			pstatement.setInt(5, meeting.getMaxParticipants());
+			pstatement.setObject(2, new java.sql.Date(meeting.getDate()).toLocalDate());
+			pstatement.setInt(3, meeting.getDuration());
+			pstatement.setInt(4, meeting.getMaxParticipants());
 			
 			pstatement.executeUpdate();
 		} catch(SQLException e) {
@@ -145,7 +176,6 @@ public class MeetingDAO {
 		}
 	}
 	
-	
 	public int getMaxParticipants(int meetingId) throws SQLException {
 		int result;
 		ResultSet resSet = null;
@@ -176,5 +206,4 @@ public class MeetingDAO {
 		
 		return result;
 	}
-	
 }

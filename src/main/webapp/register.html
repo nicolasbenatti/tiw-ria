@@ -2,26 +2,56 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>REGISTER</title>
+	<title>Sign in / Sign up</title>
+	<link rel="stylesheet" type="text/css" media="all" href="css/style.css" th:ref="@{css/style.css}"/>
 </head>
 <body>
-	<h3>LOGIN</h3>
-	<form id="loginForm" method="POST" action="login">
-		Username <input type="text" name="username" /> <br />
-		Password <input type="text" name="password" /> <br />
-		<input type="submit" />
-	</form>
-	<span th:text="${errorMsg}" class="errorMessage">Login error messages go here</span>
-
-	<h3>REGISTRATI</h3>
-	<form id="registerForm" method="POST" action="register">
-		Username <input type="text" name="username"/><span th:text="${error.notUniqueUsername}" class="errorMessage">Duplicate username error</span><br/>
-		E-mail <input type="text" name="email"/><span th:text="${error.invalidEmail}" class="errorMessage">Invalid email error</span><br/>
-		Password <input type="text" name="password"/><br/>
-		Repeat Password <input type="text" name="passwordConfirmation" /><span th:text="${error.passwordMismatch}" class="errorMessage">Non-matching passwords error</span><br/>
-		<input type="submit"/>
-	</form>
-	<span th:text="${error.missingEntries}" class="errorMessage">Signup error messages go here</span>
-	<h4 th:text="${successfulSignup}">Successful signup message goes here</h4>
+	<div id="loginFormContainer">
+		<h3>Sign in</h3>
+		<form id="loginForm" method="POST" action="login">
+			<table>
+				<tr>
+					<td><label>Username</label></td>
+					<td><input type="text" name="username"/></td>
+				</tr>
+				<tr>
+					<td><label>Password</label></td>
+					<td><input type="text" name="password"/></td>
+				</tr>
+			</table>
+			<input type="submit" value="Sign in"/>
+		</form>
+		<span th:text="${errorMsg}" class="errorMessage">Login error messages go here</span>
+	</div>
+	
+	<div id="signupFormContainer">
+		<h3>Sign up</h3>
+		<form id="registerForm" method="POST" action="register">
+			<table>
+				<tr>
+					<td><label>Username</label></td>
+					<td><input type="text" name="username"/></td>
+					<td><span th:text="${error.notUniqueUsername}" class="errorMessage">Duplicate username error</span></td>
+				</tr>
+				<tr>
+					<td><label>E-mail</label></td>
+					<td><input type="text" name="email"/></td>
+					<td><span th:text="${error.invalidEmail}" class="errorMessage">Invalid email error</span></td>
+				</tr>
+				<tr>
+					<td><label>Password</label></td>
+					<td><input type="text" name="password"/><br/></td>
+				</tr>
+				<tr>
+					<td><label>Repeat Password</label></td>
+					<td><input type="text" name="passwordConfirmation"/></td>
+					<td><span th:text="${error.passwordMismatch}" class="errorMessage">Non-matching passwords error</span></td>
+				</tr>
+			</table>
+			<input type="submit" value="Sign up"/>
+		</form>
+		<span th:text="${error.missingEntries}" class="errorMessage">Signup error messages go here</span>
+		<h4 th:text="${successfulSignup}">Successful signup message goes here</h4>
+	</div>
 </body>
 </html>

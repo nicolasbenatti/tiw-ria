@@ -30,6 +30,7 @@ public class UserDAO {
 			res = statement.executeQuery(query);
 			while(res.next()) {
 				UserBean user = new UserBean();
+				user.setId(res.getInt("user_id"));
 				user.setUsername(res.getString("username"));
 				user.setEmail(res.getString("email"));
 				user.setPassword(res.getString("user_password"));
