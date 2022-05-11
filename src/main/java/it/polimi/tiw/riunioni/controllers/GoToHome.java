@@ -21,7 +21,7 @@ public class GoToHome extends HttpServlet {
     
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String path = getServletContext().getContextPath() + "/home.html";
+		String path = getServletContext().getContextPath() + "/home";
 		response.sendRedirect(path);
 	}
 

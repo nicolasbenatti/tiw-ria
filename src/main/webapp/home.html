@@ -3,63 +3,69 @@
 <head>
 <meta charset="UTF-8">
 	<title>Home</title>
-	<link rel="stylesheet" type="text/css" media="all" href="/css/style.css" th:ref="@{/css/style.css}"/>
+	<link rel="stylesheet" type="text/css" media="all" href="css/style.css" th:ref="@{css/style.css}"/>
 </head>
 <body>
 	<div th:switch="${session.noLogin}">
-		<h1 th:case="${true}" th:text="${errorNoLogin}" class="errorMessage">This is the error message you get if trying to access the page while not logged in</h1>
+		<h1 th:case="${true}" th:text="${errorNoLogin}" class="error">This is the error message you get if trying to access the page while not logged in</h1>
 		<!-- <h1 th:text="${session.noLogin}"></h1> -->
 		<div th:case="${false}" class="mainContentContainer">
 			<!-- list hosted meetings -->
-			<h4>Here are the meetings you hosted</h4>
-			<table border ="1">
-				<thead>
-					<tr>
-						<th>Title</th>
-						<th>Date</th>
-						<th>Duration</th>
-						<th>Max # of guests allowed</th>
-					</tr>
-				</thead>
-				<tbody th:remove="all-but-first">
-					<tr th:each="meeting : ${hostedMeetings}">
-						<td th:text="${meeting.title}">foo</td>
-						<td th:text="${meeting.date}">foo</td>
-						<td th:text="${meeting.duration}">foo</td>
-						<td th:text="${meeting.maxParticipants}">10</td>
-					</tr>
-					<tr>
-						<td>foo</td>
-						<td>foo</td>
-						<td>foo</td>
-						<td>15</td>
-					</tr>
-				</tbody>
-			</table>
+			<div id="hostedMeetingsContainer" th:if="${not #lists.isEmpty(hostedMeetings)}">
+				<h4>Here are the meetings you hosted</h4>
+				<table border ="1">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Date</th>
+							<th>Duration</th>
+							<th>Max # of guests allowed</th>
+						</tr>
+					</thead>
+					<tbody th:remove="all-but-first">
+						<tr th:each="meeting : ${hostedMeetings}">
+							<td th:text="${meeting.title}">foo</td>
+							<td th:text="${meeting.date}">foo</td>
+							<td th:text="${meeting.duration}">foo</td>
+							<td th:text="${meeting.maxParticipants}">10</td>
+						</tr>
+						<tr>
+							<td>foo</td>
+							<td>foo</td>
+							<td>foo</td>
+							<td>15</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3 th:if="${#lists.isEmpty(hostedMeetings)}">You currently have no valid meetings</h3>
 			
 			<!-- list meetings to attend -->
-			<h4>Here are the meetings you have been invited to</h4>
-			<table border ="1">
-				<thead>
-					<tr>
-						<th>Title</th>
-						<th>Date</th>
-						<th>Duration</th>
-					</tr>
-				</thead>
-				<tbody th:remove="all-but-first">
-					<tr th:each="meeting : ${meetingsToAttend}">
-						<td th:text="${meeting.title}">bar</td>
-						<td th:text="${meeting.date}">bar</td>
-						<td th:text="${meeting.duration}">bar</td>
-					</tr>
-					<tr>
-						<td>bar</td>
-						<td>bar</td>
-						<td>bar</td>
-					</tr>
-				</tbody>
-			</table>
+			<div id="invitationsContainer" th:if="${not #lists.isEmpty(meetingsToAttend)}">
+				<h4>Here are your invitations</h4>
+				<table border ="1">
+					<thead>
+						<tr>
+							<th>Title</th>
+							<th>Date</th>
+							<th>Duration</th>
+						</tr>
+					</thead>
+					<tbody th:remove="all-but-first">
+						<tr th:each="meeting : ${meetingsToAttend}">
+							<td th:text="${meeting.title}">bar</td>
+							<td th:text="${meeting.date}">bar</td>
+							<td th:text="${meeting.duration}">bar</td>
+						</tr>
+						<tr>
+							<td>bar</td>
+							<td>bar</td>
+							<td>bar</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+			<h3 th:if="${#lists.isEmpty(meetingsToAttend)}">You currently have no valid invitations</h3>
 			
 			<h4>Create a new meeting</h4>
 			<form id="createMeetingForm" method="POST" action="createMeeting">
@@ -87,7 +93,7 @@
 				</table>
 				<input type="submit"/> 
 			</form>
-			<span th:text="${errorMsg}"> missing fields message goes here </span> <br>
+			<span th:text="${errorMsg}" class="error"> missing fields message goes here </span> <br>
 			<a href="logout">LOGOUT</a>
 		</div>
 	</div>

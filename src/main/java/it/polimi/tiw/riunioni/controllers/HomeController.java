@@ -22,7 +22,7 @@ import it.polimi.tiw.riunioni.beans.MeetingBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
-@WebServlet("/home.html")
+@WebServlet("/home")
 public class HomeController extends HttpServlet {
 	private static final long serialVersionUID = 1L;
     private Connection conn;   

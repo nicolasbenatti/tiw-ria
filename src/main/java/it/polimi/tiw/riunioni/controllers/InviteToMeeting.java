@@ -1,6 +1,8 @@
 package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.sql.SQLException;
 import java.text.ParseException;
@@ -70,15 +72,32 @@ public class InviteToMeeting extends HttpServlet {
 			System.out.println("******");
 		}
 		
+		// check that all the IDs are present in the DB
+		UserDAO userDao = new UserDAO(this.conn);
+		List<Integer> selectedUserIds = new ArrayList<>();
+		
+		try {
+			for(String idString : checkedIds) {
+				int id = Integer.parseInt(idString);
+				if(userDao.checkUserid(id)) {
+					selectedUserIds.add(id);
+				}
+			}
+		} catch(SQLException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "can't check id integrity from DB");
+			return;
+		}
+		
 		List<UserBean> users = new ArrayList<>();
 		List<SelectedUserBean> selectedUsers = new ArrayList<>();
-		UserDAO dao = new UserDAO(this.conn);
 		try {
-			users = dao.getAllUsers();
-			for(UserBean b: users) {
+			users = userDao.getAllUsersExcept(((UserBean)request.getSession().getAttribute("user")).getId());
+			for(UserBean b : users) {
 				SelectedUserBean tmp= new SelectedUserBean();
-				if(checkedIds.contains(b.getUsername()))
+				if(selectedUserIds.contains(b.getId())) {
+					System.out.println("OSSIGNUR");
 					tmp.setSelected(true);
+				}
 				else
 					tmp.setSelected(false);
 				
@@ -90,55 +109,87 @@ public class InviteToMeeting extends HttpServlet {
 			e.printStackTrace();
 		}
 		
-		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-		Date meetingDate = new Date(Long.parseLong(request.getParameter("meetingdate")));
+		String title = "", date = "", duration = "", maxParticipants = "";
+		try {
+			title = request.getParameter("meetingtitle");
+			date = request.getParameter("meetingdate");
+			duration = request.getParameter("meetingduration");
+			maxParticipants = request.getParameter("maxparticipants");
+			
+			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty()
+					|| maxParticipants == null || maxParticipants.isEmpty()) {
+				throw new Exception();
+			}
+		} catch(Exception e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
+			return;
+		}
+		
+		long meetingDate = 0;
+		int meetingDuration = 0, maxGuests = 0;
+		try {
+			meetingDate = Long.parseLong(date);
+			meetingDuration = Integer.parseInt(duration);
+			maxGuests = Integer.parseInt(maxParticipants);
+		} catch(NumberFormatException e) {
+			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "malformed parameters");
+			return;
+		}
 		
 		MeetingBean newMeeting = new MeetingBean();
-		newMeeting.setTitle(request.getParameter("meetingtitle"));
-		newMeeting.setDate(meetingDate.getTime());
-		newMeeting.setDuration(Integer.parseInt(request.getParameter("meetingduration")));
-		newMeeting.setMaxParticipants(Integer.parseInt(request.getParameter("maxparticipants")));
+		newMeeting.setTitle(title);
+		newMeeting.setDate(meetingDate);
+		newMeeting.setDuration(meetingDuration);
+		newMeeting.setMaxParticipants(maxGuests);
 		
 		if(selectedUsers.size() > newMeeting.getMaxParticipants()) {
 			if(attempts == 3) {
 				attempts = 0;
-				path = getServletContext().getContextPath() + "/cancellazione.html";
+				path = getServletContext().getContextPath() + "/abortMeeting";
 				response.sendRedirect(path);
 			} else
 				attempts++;
 			
-			path = "anagrafica.html";
-		}
-		
-		if(checkedIds.size() > 0) {
-			// insert meeting and guests in the DB
-			// note: this is a transaction in which both the meeting data and the 
-			// guests are inserted atomically, in order not to leave the DB
-			// in an inconsistent state
-			MeetingDAO meetingDao = new MeetingDAO(this.conn);
-			try {
-				this.conn.setAutoCommit(false);
-				meetingDao.hostMeeting(newMeeting);
-				newMeeting.setId(meetingDao.getIdFromName(newMeeting.getTitle()));
-				for(String guestId : checkedIds) {
-					meetingDao.inviteUserToMeeting(Integer.parseInt(guestId), newMeeting.getId());
-				}
-				this.conn.commit();
-			} catch(SQLException e) {
-				e.printStackTrace();
-			}
+			System.out.println("ATTEMPT #" + attempts);
 			
-			readyToInsert = true;
-			path = "home.html";
+			path = "anagrafica.html";
+		} else {
+			if(checkedIds.size() > 0) {
+				// insert meeting and guests in the DB
+				// note: this is a transaction in which both the meeting data and the 
+				// guests are inserted atomically, in order not to leave the DB
+				// in an inconsistent state
+				MeetingDAO meetingDao = new MeetingDAO(this.conn);
+				try {
+					this.conn.setAutoCommit(false);
+					meetingDao.hostMeeting(newMeeting);
+					newMeeting.setId(meetingDao.getIdFromName(newMeeting.getTitle()));
+					for(String guestId : checkedIds) {
+						meetingDao.inviteUserToMeeting(Integer.parseInt(guestId), newMeeting.getId());
+					}
+					this.conn.commit();
+				} catch(SQLException e) {
+					try {
+						this.conn.rollback();
+					} catch(SQLException e1) {
+						response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Can't rollback transaction");
+						return;
+					}
+				}
+				
+				readyToInsert = true;
+				path = "/goToHome";
+			}
 		}
 		
 		if(!readyToInsert) {
+			System.out.println("not ready to insert");
 			ctx.setVariable("meetingTitle", request.getParameter("meetingtitle"));
 			ctx.setVariable("newMeeting", newMeeting);
 			ctx.setVariable("selectedUsers", selectedUsers);
 			this.templateEngine.process(path, ctx, response.getWriter());
 		} else {
-			path = getServletContext().getContextPath() +  "/" + path;
+			path = getServletContext().getContextPath() + path;
 			response.sendRedirect(path);
 		}
 	}

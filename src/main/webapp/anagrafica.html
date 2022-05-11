@@ -3,16 +3,16 @@
 <head>
 <meta charset="UTF-8">
 	<title>Anagrafica</title>
-	<link rel="stylesheet" type="text/css" media="all" href="/css/style.css" th:ref="@{/css/style.css}"/>
+	<link rel="stylesheet" type="text/css" media="all" href="css/style.css" th:ref="@{css/style.css}"/>
 </head>
 <body>
 	<div th:switch="${session.noLogin}">
 		<h1 th:case="${true}" th:text="${errorNoLogin}" class="errorMessage">This is the error message you get if trying to access the page while not logged in</h1>
 		
-		<div th:case="${false}" class="mainContentContainer" >
-			<h2>Invite user to meeting <span th:text="${newMeeting.title}">FOOBAR</span></h2>
+		<div th:case="${false}" class="mainContentContainer">
+			<h2>Invite user to meeting: <span th:text="${newMeeting.title}" class="meetingTitle">FOOBAR</span></h2>
 			
-			<form method = "GET" action = "inviteToMeeting" >
+			<form method = "GET" action = "inviteToMeeting" th:if="${not #lists.isEmpty(selectedUsers)}">
 				<div th:remove="all-but-first">
 					<div th:each="selectedUser: ${selectedUsers}">
 						<input type="checkbox" name="users" th:value="${selectedUser.id}" th:checked="${selectedUser.selected}"/>
@@ -39,6 +39,10 @@
 				
 				<input type="submit" value="crea riunione"/>
 			</form>
+			<div th:if="${#lists.isEmpty(selectedUsers)}" class="error">
+				<p>No available guests</p>
+				<a th:href="@{http://localhost:8080/GestioneRiunioni/goToHome}" href="goToHome">Back to Home</a>
+			</div>
 		</div>
 	</div>
 </body>

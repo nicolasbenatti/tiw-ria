@@ -1,6 +1,19 @@
 @charset "UTF-8";
 
 .error {
-	text-color: red;
+	color: red;
 	font-weight: 600;
+}
+
+.success {
+	color: green;
+	font-weight: 600;
+}
+
+table {
+	border: 1px solid black;
+}
+
+.meetingTitle {
+	font-style: italic;
 }

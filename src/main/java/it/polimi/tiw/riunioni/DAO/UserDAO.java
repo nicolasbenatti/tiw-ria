@@ -19,15 +19,16 @@ public class UserDAO {
 		this.conn = dbConn;
 	}
 	
-	public List<UserBean> getAllUsers() throws SQLException {
+	public List<UserBean> getAllUsersExcept(int userid) throws SQLException {
 		List<UserBean> users = new ArrayList<UserBean>();
 		ResultSet res = null;
-		Statement statement = null;
-		String query = "SELECT * FROM users";
+		PreparedStatement pstatement = null;
+		String query = "SELECT * FROM users WHERE user_id <> ?";
 		
 		try {
-			statement = this.conn.createStatement();
-			res = statement.executeQuery(query);
+			pstatement = this.conn.prepareStatement(query);
+			pstatement.setInt(1, userid);
+			res = pstatement.executeQuery();
 			while(res.next()) {
 				UserBean user = new UserBean();
 				user.setId(res.getInt("user_id"));
@@ -48,7 +49,7 @@ public class UserDAO {
 			}
 			
 			try {
-				statement.close();
+				pstatement.close();
 			} catch(Exception e2) {
 				e2.printStackTrace();
 			}
@@ -110,8 +111,6 @@ public class UserDAO {
 			}
 		}
 	
-		System.out.println("**" + isResultSetEmpty + "**");
-		
 		return !isResultSetEmpty;
 	}
 	
@@ -136,5 +135,36 @@ public class UserDAO {
 				return user;
 			}
 		}
+	}
+	
+	public boolean checkUserid(int userid) throws SQLException {
+		String query = "SELECT * FROM users WHERE EXISTS (SELECT * FROM users WHERE user_id = ?)";
+		PreparedStatement pstatement = null;
+		ResultSet resSet = null;
+		boolean isIdPresent = false;
+		
+		try {
+			pstatement = this.conn.prepareStatement(query);
+			pstatement.setInt(1, userid);
+			
+			resSet = pstatement.executeQuery();
+			isIdPresent = resSet.isBeforeFirst();
+		} catch(SQLException e) {
+			throw new SQLException(e);
+		} finally {
+			try {
+				resSet.close();
+			} catch(Exception e1) {
+				e1.printStackTrace();
+			}
+			
+			try {
+				pstatement.close();
+			} catch(Exception e2) {
+				e2.printStackTrace();
+			}
+		}
+		
+		return isIdPresent;
 	}
 }

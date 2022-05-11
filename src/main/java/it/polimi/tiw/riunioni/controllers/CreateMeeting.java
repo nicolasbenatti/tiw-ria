@@ -64,8 +64,12 @@ public class CreateMeeting extends HttpServlet {
 					|| maxParticipants == null || maxParticipants.isEmpty())
 				throw new Exception("Missing fields");
 		}catch(Exception e) {
-			ctx.setVariable("errorMsg", e.getMessage()); 
-			this.templateEngine.process(path, ctx, response.getWriter());
+			if(request.getSession().getAttribute("user") == null) {
+				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
+			} else {
+				ctx.setVariable("errorMsg", e.getMessage()); 
+				this.templateEngine.process(path, ctx, response.getWriter());
+			}
 			return;
 		}
 		
