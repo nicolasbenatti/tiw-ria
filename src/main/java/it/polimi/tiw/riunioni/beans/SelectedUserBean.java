@@ -5,7 +5,6 @@ public class SelectedUserBean {
 	private String userName;
 	private boolean selected;
 	
-	
 	public SelectedUserBean() {
 		id = 0;
 		userName = "";

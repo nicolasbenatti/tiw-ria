@@ -34,6 +34,7 @@ public class MeetingDAO {
 			resSet = pstatement.executeQuery();
 			while(resSet.next()) {
 				MeetingBean toAdd = new MeetingBean();
+				toAdd.setId(resSet.getInt("meeting_id"));
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
 				toAdd.setDuration(resSet.getInt("duration"));
@@ -73,6 +74,7 @@ public class MeetingDAO {
 			resSet = pstatement.executeQuery();
 			while(resSet.next()) {
 				MeetingBean toAdd = new MeetingBean();
+				toAdd.setId(resSet.getInt("meeting_id"));
 				toAdd.setTitle(resSet.getString("title"));
 				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
 				toAdd.setDuration(resSet.getInt("duration"));

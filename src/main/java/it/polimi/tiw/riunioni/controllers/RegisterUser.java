@@ -7,28 +7,23 @@ import java.util.regex.Pattern;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
-
 import it.polimi.tiw.riunioni.DAO.UserDAO;
-import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
-import it.polimi.tiw.riunioni.utils.SanitizeUtils;
+import it.polimi.tiw.riunioni.utils.Utils;
 
 @WebServlet("/register")
+@MultipartConfig
 public class RegisterUser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private static final String REGEX_VALIDATE_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 	private Connection conn = null;
-	private TemplateEngine templateEngine;
 	
 	public RegisterUser() {
 		super();
@@ -37,32 +32,20 @@ public class RegisterUser extends HttpServlet {
     public void init() throws ServletException {
 		ServletContext context = getServletContext();
 		this.conn = ConnectionHandler.getConnection(context);
-		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(context);
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		this.templateEngine = new TemplateEngine();
-		this.templateEngine.setTemplateResolver(templateResolver);
-		templateResolver.setSuffix(".html");
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String path = "register.html";
-		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
-		
-		String username = SanitizeUtils.sanitizeString(request.getParameter("username"));
-		String email = SanitizeUtils.sanitizeString(request.getParameter("email"));
+		String username = Utils.sanitizeString(request.getParameter("username"));
+		String email = Utils.sanitizeString(request.getParameter("email"));
 		String password = request.getParameter("password");
-		String confirmation = SanitizeUtils.sanitizeString(request.getParameter("passwordConfirmation"));
-		RegisterErrorBean regErrBean = new RegisterErrorBean();
+		String confirmation = Utils.sanitizeString(request.getParameter("passwordConfirmation"));
 		
-		// fill also login bean to avoid crashes
-		ctx.setVariable("errorMsg", "");
+		System.out.println(username + ", " + email + ", " + password + ", " + confirmation);
 		
 		if(username == null || username.isEmpty() || email == null || email.isEmpty() || password == null 
 				|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
-			regErrBean.setMissingEntries("missing fields");
-			ctx.setVariable("error", regErrBean);
-			this.templateEngine.process(path, ctx, response.getWriter());
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Missing fields");
 			return;
 		}
 		
@@ -76,23 +59,20 @@ public class RegisterUser extends HttpServlet {
 		}
 		
 		if(isUsernameDuplicate) {
-			regErrBean.setNotUniqueUsername("the username already exists");
-			ctx.setVariable("error", regErrBean);
-			this.templateEngine.process(path, ctx, response.getWriter());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("the username already exists");
 			return;
 		}
 		
 		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
-			regErrBean.setInvalidEmail("invalid email address");
-			ctx.setVariable("error", regErrBean);
-			this.templateEngine.process(path, ctx, response.getWriter());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("invalid email address");
 			return;
 		}
 		
 		if(!password.equals(confirmation)) {
-			regErrBean.setPasswordMismatch("passwords don't match");
-			ctx.setVariable("error", regErrBean);
-			this.templateEngine.process(path, ctx, response.getWriter());
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("passwords don't match");
 			return;
 		}
 		
@@ -107,13 +87,14 @@ public class RegisterUser extends HttpServlet {
 			return;
 		}
 		if(created == 0) {
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "couldn't create a new user");
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't create a new user");
 			return;
 		}
 		
-		ctx.setVariable("successfulSignup", "Registration successful, you can now login");
-		ctx.setVariable("error", regErrBean);
-		this.templateEngine.process(path, ctx, response.getWriter());
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().println("Registration successful, you can now login");
 	}
 	
 	public void destroy() {

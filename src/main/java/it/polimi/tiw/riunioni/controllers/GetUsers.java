@@ -1,15 +1,9 @@
 package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import javax.servlet.ServletContext;
@@ -19,24 +13,21 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import com.google.gson.Gson;
 
-import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.DAO.UserDAO;
-import it.polimi.tiw.riunioni.beans.MeetingBean;
-import it.polimi.tiw.riunioni.beans.SelectedUserBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
-@WebServlet("/inviteToMeeting")
-public class InviteToMeeting extends HttpServlet {
+/**
+ * Servlet implementation class GetUsers
+ */
+@WebServlet("/getUsers")
+public class GetUsers extends HttpServlet {
 	private static final long serialVersionUID = 1L;
 	private Connection conn = null;
    
-    public InviteToMeeting() {
+    public GetUsers() {
         super();
     }
 	
@@ -46,9 +37,9 @@ public class InviteToMeeting extends HttpServlet {
     }
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		ServletContext servletContext = getServletContext();
-
+		// check that all the IDs are present in the DB
 		UserDAO userDao = new UserDAO(this.conn);
+		
 		List<UserBean> users = new ArrayList<>();
 		try {
 			users = userDao.getAllUsersExcept(((UserBean)request.getSession().getAttribute("user")).getId());
@@ -56,7 +47,12 @@ public class InviteToMeeting extends HttpServlet {
 			e.printStackTrace();
 		}
 		
+		String json = new Gson().toJson(users);
 		
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().println(json);
 	}
 	
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

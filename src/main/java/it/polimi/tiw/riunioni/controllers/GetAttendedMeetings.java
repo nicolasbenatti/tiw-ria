@@ -12,48 +12,36 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import com.google.gson.Gson;
 
 import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.beans.MeetingBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
-@WebServlet("/home")
-public class HomeController extends HttpServlet {
+@WebServlet("/getAttendedMeetings")
+public class GetAttendedMeetings extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-    private Connection conn;   
-    private TemplateEngine templateEngine;
+    private Connection conn;
     
-    public HomeController() {
+    public GetAttendedMeetings() {
         super();
     }
 
     public void init() throws ServletException {
     	ServletContext servletContext = getServletContext();
 		this.conn = ConnectionHandler.getConnection(servletContext);
-		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		this.templateEngine = new TemplateEngine();
-		this.templateEngine.setTemplateResolver(templateResolver);
-		templateResolver.setSuffix(".html");
     }
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String path = "home.html";
-		ServletContext servletContext = getServletContext();
-		final WebContext ctx = new WebContext(request, response, servletContext, request.getLocale());
 		
-		List<MeetingBean> attendedMeetings = null, hostedMeetings = null;
+		List<MeetingBean> attendedMeetings = null; 
 		
 		// you must access this page through a login, otherwise an error will be displayed
 		if(request.getSession().getAttribute("user") == null) {
 			request.getSession().setAttribute("noLogin", true);
-			ctx.setVariable("errorNoLogin", "YOU MUST LOGIN BEFORE ACCESSING THIS PAGE");
-			this.templateEngine.process(path, ctx, response.getWriter());
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "YOU MUST LOGIN BEFORE ACCESSING THIS PAGE");
 			return;
 		}
 
@@ -62,15 +50,17 @@ public class HomeController extends HttpServlet {
 		try {
 			int userId = ((UserBean)request.getSession().getAttribute("user")).getId();
 			attendedMeetings = meetDao.getMeetingsAttendedByUser(userId);
-			hostedMeetings = meetDao.getMeetingsHostedByUser(userId);
 		} catch(SQLException e) {
 			e.printStackTrace();
 			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to retrieve meetings from DB");
 		}
 		
-		ctx.setVariable("hostedMeetings", hostedMeetings);
-		ctx.setVariable("meetingsToAttend", attendedMeetings);		
-		this.templateEngine.process(path, ctx, response.getWriter());
+		String json = new Gson().toJson(attendedMeetings);
+		
+		response.setStatus(HttpServletResponse.SC_OK);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().println(json);
 	}
 	
 	@Override

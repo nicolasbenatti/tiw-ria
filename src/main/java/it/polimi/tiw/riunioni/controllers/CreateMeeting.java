@@ -21,7 +21,7 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
 
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
-import it.polimi.tiw.riunioni.utils.SanitizeUtils;
+import it.polimi.tiw.riunioni.utils.Utils;
 
 @WebServlet("/createMeeting")
 public class CreateMeeting extends HttpServlet {
@@ -55,11 +55,11 @@ public class CreateMeeting extends HttpServlet {
 		String title, date, time, duration, maxParticipants;
 		
 		try{
-			title = SanitizeUtils.sanitizeString(request.getParameter("meetingTitle"));
-			date = SanitizeUtils.sanitizeString(request.getParameter("meetingDate"));
-			time = SanitizeUtils.sanitizeString(request.getParameter("meetingTime"));
-			duration = SanitizeUtils.sanitizeString(request.getParameter("meetingDuration"));
-			maxParticipants = SanitizeUtils.sanitizeString(request.getParameter("maxParticipants"));
+			title = Utils.sanitizeString(request.getParameter("meetingTitle"));
+			date = Utils.sanitizeString(request.getParameter("meetingDate"));
+			time = Utils.sanitizeString(request.getParameter("meetingTime"));
+			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
+			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
 			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty() || time == null || time.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty())
 				throw new Exception("Missing fields");

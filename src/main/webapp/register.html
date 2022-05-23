@@ -3,12 +3,14 @@
 <head>
 <meta charset="UTF-8">
 	<title>Sign in / Sign up</title>
-	<link rel="stylesheet" type="text/css" media="all" href="css/style.css" th:ref="@{css/style.css}"/>
+	<link rel="stylesheet" type="text/css" media="all" href="css/style.css"/>
+	<script src="utils.js" charset="utf-8" defer></script>
+	<script src="loginManagement.js" charset="utf-8" defer></script>
 </head>
 <body>
 	<div id="loginFormContainer">
 		<h3>Sign in</h3>
-		<form id="loginForm" method="POST" action="login">
+		<form id="loginForm" action="#">
 			<table>
 				<tr>
 					<td><label>Username</label></td>
@@ -16,42 +18,39 @@
 				</tr>
 				<tr>
 					<td><label>Password</label></td>
-					<td><input type="text" name="password"/></td>
+					<td><input type="password" name="password"/></td>
 				</tr>
 			</table>
-			<span th:text="${errorMsg}" class="error">Login error messages go here</span><br/>
-			<input type="submit" value="Sign in"/>
+			<input type="button" id="loginButton" value="Sign in"/>
 		</form>
+		<p id="errorMessage"></p>
 	</div>
 	
 	<div id="signupFormContainer">
 		<h3>Sign up</h3>
-		<form id="registerForm" method="POST" action="register">
+		<form id="registerForm" action="#">
 			<table>
 				<tr>
 					<td><label>Username</label></td>
 					<td><input type="text" name="username"/></td>
-					<td><span th:text="${error.notUniqueUsername}" class="error">Duplicate username error</span></td>
 				</tr>
 				<tr>
 					<td><label>E-mail</label></td>
 					<td><input type="text" name="email"/></td>
-					<td><span th:text="${error.invalidEmail}" class="error">Invalid email error</span></td>
 				</tr>
 				<tr>
 					<td><label>Password</label></td>
-					<td><input type="text" name="password"/><br/></td>
+					<td><input type="password" name="password"/><br/></td>
 				</tr>
 				<tr>
 					<td><label>Repeat Password</label></td>
-					<td><input type="text" name="passwordConfirmation"/></td>
-					<td><span th:text="${error.passwordMismatch}" class="error">Non-matching passwords error</span></td>
+					<td><input type="password" name="passwordConfirmation"/></td>
 				</tr>
 			</table>
-			<span th:text="${error.missingEntries}" class="error">Signup error messages go here</span><br/>
-			<input type="submit" value="Sign up"/>
+			<input type="button" id="signupButton" value="Sign up"/>
 		</form>
-		<h4 th:text="${successfulSignup}" class="success">Successful signup message goes here</h4>
+		<p id="signupErrors"></p>
+		<p id="signupSuccess"></p>
 	</div>
 </body>
 </html>
