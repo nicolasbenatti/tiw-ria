@@ -1,7 +1,7 @@
 (function() {
 	var modal = document.getElementById("invitationModal");
 	
-	document.getElementById("invitationButton").addEventListener('click', (e) => {
+	document.getElementById("hostButton").addEventListener('click', (e) => {
 		modal.style.display = "block";
 	})
 

@@ -91,11 +91,11 @@
 		this.alert = alert;
 		this.listcontainer = listcontainer;
 		this.listcontainerbody = listcontainerbody;
-		
+
 		this.reset = function() {
 			this.listcontainer.style.visibility = "hidden";
 		}
-		
+
 		this.show = function() {
 			var self = this;
 			makeCall("GET", "getUsers", null,
@@ -120,28 +120,28 @@
 				}
 			);
 		};
-		
+
 		// fill the list with user data
 		this.update = function(usersArray) {
 			this.listcontainerbody.innerHTML = ""; // empty the body
 			var self = this;
-			
+
 			usersArray.forEach(function(user) {
 				row = document.createElement("div");
-				
+
 				checkbox = document.createElement("input");
 				checkbox.setAttribute("type", "checkbox");
 				checkbox.setAttribute("name", "users");
 				checkbox.setAttribute("value", user.id);
 				checkbox.setAttribute("id", user.id);
-				
+
 				label = document.createElement("label");
 				label.textContent = user.username;
 				label.setAttribute("for", user.id);
-				
+
 				row.appendChild(checkbox);
 				row.appendChild(label);
-				
+
 				self.listcontainerbody.appendChild(row);
 			});
 			this.listcontainer.style.visibility = "visible";
@@ -188,7 +188,7 @@
 			//wizard.reset();
 		};
 	}
-	
+
 	// fills the table with meeting data
 	function fillMeetingTable(arrayMeetings) {
 		var elem, i, row, titlecell, datecell, durationcell, maxcell;
@@ -219,15 +219,36 @@
 		this.listcontainer.style.visibility = "visible";
 	}
 
-	//TODO: complete
-	document.getElementById("addMeetingButton").addEventListener('click', (e) => {
+
+	document.getElementById("inviteButton").addEventListener('click', (e) => {
 		var form = e.target.closest("form");
 		console.log(form);
 		if (form.checkValidity()) {
-			// do ajax call and stuff
+			makeCall("POST", 'login', form,
+				function(x) {
+					if (x.readyState == XMLHttpRequest.DONE) {
+						var message = x.responseText;
+						switch (x.status) {
+							case 200:
+								sessionStorage.setItem('username', message);
+								window.location.href = "home.html";
+								break;
+							case 400: // bad request
+								document.getElementById("errorMessage").textContent = message;
+								break;
+							case 401: // unauthorized
+								document.getElementById("errorMessage").textContent = message;
+								break;
+							case 500: // server error
+								document.getElementById("errorMessage").textContent = message;
+								break;
+						}
+					}
+				}
+			);
 		} else {
 			form.reportValidity();
 		}
 	});
-	
+
 })();
