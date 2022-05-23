@@ -1,9 +1,9 @@
 (function() {
 	var modal = document.getElementById("invitationModal");
 	
-	document.getElementById("hostButton").addEventListener('click', (e) => {
+	/*document.getElementById("hostButton").addEventListener('click', (e) => {
 		modal.style.display = "block";
-	})
+	})*/
 
 	document.getElementsByClassName("close")[0].addEventListener('click', (e) => {
 		modal.style.display = "none";

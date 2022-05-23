@@ -1,13 +1,13 @@
 package it.polimi.tiw.riunioni.DAO;
 
 import java.sql.Connection;
-import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Time;
 import java.time.ZoneId;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import com.mysql.cj.xdevapi.Statement;
@@ -36,7 +36,7 @@ public class MeetingDAO {
 				MeetingBean toAdd = new MeetingBean();
 				toAdd.setId(resSet.getInt("meeting_id"));
 				toAdd.setTitle(resSet.getString("title"));
-				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
+				toAdd.setDate(resSet.getDate("meeting_date"));
 				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
@@ -76,7 +76,7 @@ public class MeetingDAO {
 				MeetingBean toAdd = new MeetingBean();
 				toAdd.setId(resSet.getInt("meeting_id"));
 				toAdd.setTitle(resSet.getString("title"));
-				toAdd.setDate(resSet.getTimestamp("meeting_date").getTime());
+				toAdd.setDate(resSet.getDate("meeting_date"));
 				toAdd.setDuration(resSet.getInt("duration"));
 				toAdd.setMaxParticipants(resSet.getInt("max_participants"));
 				
@@ -134,16 +134,16 @@ public class MeetingDAO {
 		return res;
 	}
 	
-	public void hostMeeting(MeetingBean meeting) throws SQLException {
+	public void hostMeeting(String title, Date date, int duration, int maxParticipants) throws SQLException {
 		String query = "INSERT INTO meetings(title, meeting_date, duration, max_participants) VALUES(?, ?, ?, ?)";
 		PreparedStatement pstatement = null;
 		
 		try {
 			pstatement = this.conn.prepareStatement(query);
-			pstatement.setString(1, meeting.getTitle());
-			pstatement.setObject(2, new java.sql.Date(meeting.getDate()).toLocalDate());
-			pstatement.setInt(3, meeting.getDuration());
-			pstatement.setInt(4, meeting.getMaxParticipants());
+			pstatement.setString(1, title);
+			pstatement.setObject(2, new java.sql.Date(date.getTime()));
+			pstatement.setInt(3, duration);
+			pstatement.setInt(4, maxParticipants);
 			
 			pstatement.executeUpdate();
 		} catch(SQLException e) {

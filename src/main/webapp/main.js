@@ -219,33 +219,130 @@
 		this.listcontainer.style.visibility = "visible";
 	}
 
-
+	let attempts = 0;
 	document.getElementById("inviteButton").addEventListener('click', (e) => {
 		var form = e.target.closest("form");
 		console.log(form);
 		if (form.checkValidity()) {
-			makeCall("POST", 'login', form,
+			console.log("YOUR SELECTION", form.elements["users"]);
+			var maxP = form.elements["maxParticipants"].value;
+			var numberOfParticipants = 0;
+			for(let i = 0; i < form.elements["users"].length; i++) {
+				if(form.elements["users"][i].checked) {
+					numberOfParticipants++;
+				}
+			}
+
+			attempts++;
+			console.log("YOU HAVE DONE ", attempts, " INVITATION ATTEMPTS");
+			if (numberOfParticipants > maxP) {
+				numberOfDeselection = numberOfParticipants - maxP;
+				
+				var alert = document.getElementById("tooManyGuestsAlert");
+				alert.textContent = "DESELEZIONARE " + numberOfDeselection + " UTENTI";
+
+				if (attempts >= 3)
+					console.log("GO HOME");
+			}
+			else {
+				//TUTTO BENE -> inserisco riunione nel DB
+				attempts = 0;
+				makeCall("POST", "inviteToMeeting", form,
+					function(x) {
+						if (x.readyState == XMLHttpRequest.DONE) {
+							let message = x.responseText;
+							switch (x.status) {
+								case 200:
+									console.log("ALL GOOD");
+									var modal = document.getElementById("invitationModal");
+									modal.style.display = "none";
+									break;
+								case 400: // bad request
+									document.getElementById("tooManyGuestsAlert").textContent = "Server: " + message;
+									break;
+								case 401: // unauthorized
+									document.getElementById("tooManyGuestsAlert").textContent = "Server: " + message;
+									break;
+								case 500: // server error
+									document.getElementById("tooManyGuestsAlert").textContent = "Server: " + message;
+									break;
+							}
+						}
+				}, false);
+			}
+		} else {
+			form.reportValidity();
+		}
+	});
+
+	document.getElementById("hostButton").addEventListener('click', (e) => {
+		let form = e.target.closest("form");
+		console.log(form);
+		if (form.checkValidity()) {
+			makeCall("POST", "createMeeting", form,
 				function(x) {
 					if (x.readyState == XMLHttpRequest.DONE) {
-						var message = x.responseText;
+						let message = x.responseText;
 						switch (x.status) {
 							case 200:
-								sessionStorage.setItem('username', message);
-								window.location.href = "home.html";
+								console.log("ALL GOOD");
+								console.log(form);
+								var maxP = form.elements["maxParticipants"].value;
+								var meetingDuration = form.elements["meetingDuration"].value;
+								var meetingTime = form.elements["meetingTime"].value;
+								var meetingDate = form.elements["meetingDate"].value;
+								var meetingTitle = form.elements["meetingTitle"].value;
+
+								console.log(maxP, meetingDuration, meetingTitle, meetingDate, meetingTime);
+
+								var invitationForm = document.getElementById("invitationForm");
+
+								var input = document.createElement("input");
+								input.setAttribute("type", "hidden");
+								input.setAttribute("name", "maxParticipants");
+								input.setAttribute("value", maxP);
+
+								var input2 = document.createElement("input");
+								input2.setAttribute("type", "hidden");
+								input2.setAttribute("name", "meetingDuration ");
+								input2.setAttribute("value", meetingDuration);
+
+								var input3 = document.createElement("input");
+								input3.setAttribute("type", "hidden");
+								input3.setAttribute("name", "meetingTime");
+								input3.setAttribute("value", meetingTime);
+
+								var input4 = document.createElement("input");
+								input4.setAttribute("type", "hidden");
+								input4.setAttribute("name", "meetingDate");
+								input4.setAttribute("value", meetingDate);
+
+								var input5 = document.createElement("input");
+								input5.setAttribute("type", "hidden");
+								input5.setAttribute("name", "meetingTitle");
+								input5.setAttribute("value", meetingTitle);
+
+								invitationForm.appendChild(input);
+								invitationForm.appendChild(input2);
+								invitationForm.appendChild(input3);
+								invitationForm.appendChild(input4);
+								invitationForm.appendChild(input5);
+
+								var modal = document.getElementById("invitationModal");
+								modal.style.display = "block";
 								break;
 							case 400: // bad request
-								document.getElementById("errorMessage").textContent = message;
+								document.getElementById("meetingErrorMessage").textContent = message;
 								break;
 							case 401: // unauthorized
-								document.getElementById("errorMessage").textContent = message;
+								document.getElementById("meetingErrorMessage").textContent = message;
 								break;
 							case 500: // server error
-								document.getElementById("errorMessage").textContent = message;
+								document.getElementById("meetingErrorMessage").textContent = message;
 								break;
 						}
 					}
-				}
-			);
+				}, false);
 		} else {
 			form.reportValidity();
 		}

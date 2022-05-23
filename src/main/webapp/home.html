@@ -74,28 +74,28 @@
 		<table>
 			<tr>
 				<td><label>Title</label></td>
-				<td><input type="text" name="meetingTitle" required /></td>
+				<td><input type="text" name="meetingTitle" /></td>
 			</tr>
 			<tr>
 				<td><label>Date</label></td>
-				<td><input type="date" name="meetingDate" required /></td>
+				<td><input type="date" name="meetingDate" /></td>
 			</tr>
 			<tr>
 				<td><label>Time</label></td>
-				<td><input type="time" name="meetingTime" required /></td>
+				<td><input type="time" name="meetingTime" /></td>
 			</tr>
 			<tr>
 				<td><label>Duration</label></td>
-				<td><input type="time" name="meetingDuration" step="60"
-					required /></td>
+				<td><input type="time" name="meetingDuration" step="60" /></td>
 			</tr>
 			<tr>
 				<td><label>Max # of guests</label></td>
-				<td><input type="number" name="maxParticipants" required /></td>
+				<td><input type="number" name="maxParticipants" /></td>
 			</tr>
 		</table>
 		<input type="button" id="hostButton" value="Host Meeting" />
 	</form>
+	<p id="meetingErrorMessage"></p>
 
 	<div id="invitationModal" class="modal">
 		<div class="modal-content">
@@ -103,9 +103,9 @@
 			<form id="invitationForm">
 				<div id="guestList">
 				</div>
-				<p id="tooManyGuestsAlert"></p>
 				<input type="button" id="inviteButton" value="Invite" />
 			</form>
+			<p id="tooManyGuestsAlert"></p>
 		</div>
 	</div>
 

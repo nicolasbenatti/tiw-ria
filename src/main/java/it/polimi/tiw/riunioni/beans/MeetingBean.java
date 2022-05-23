@@ -1,13 +1,11 @@
 package it.polimi.tiw.riunioni.beans;
 
 import java.sql.Date;
-import java.sql.Time;
-import java.sql.Timestamp;
 
 public class MeetingBean {
 	private int id;
 	private String title;
-	private long date; // milliseconds from 1/1/1970
+	private Date date;
 	private int duration;
 	private int maxParticipants;
 	
@@ -15,7 +13,7 @@ public class MeetingBean {
 		this.id = 0;
 		this.title = "";
 		this.maxParticipants = 0;
-		this.date = 0;
+		this.date = null;
 		this.duration = 0;
 	}
 	
@@ -27,7 +25,7 @@ public class MeetingBean {
 		return this.title;
 	}
 	
-	public long getDate() {
+	public Date getDate() {
 		return this.date;
 	}
 	
@@ -47,7 +45,7 @@ public class MeetingBean {
 		this.title = title;
 	}
 	
-	public void setDate(long date) {
+	public void setDate(Date date) {
 		this.date = date;
 	}
 	

@@ -1,77 +1,59 @@
 package it.polimi.tiw.riunioni.controllers;
 
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
+import javax.servlet.annotation.MultipartConfig;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.WebContext;
-import org.thymeleaf.templatemode.TemplateMode;
-import org.thymeleaf.templateresolver.ServletContextTemplateResolver;
+import com.google.gson.Gson;
 
-import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 import it.polimi.tiw.riunioni.utils.Utils;
 
 @WebServlet("/createMeeting")
+@MultipartConfig
 public class CreateMeeting extends HttpServlet {
 	private static final long serialVersionUID = 1L;
-	private Connection conn = null;   
-    private TemplateEngine templateEngine;
     
     public CreateMeeting() {
         super();
     }
-    
-    public void init() throws ServletException {
-    	ServletContext servletContext = getServletContext();
-		this.conn = ConnectionHandler.getConnection(servletContext);
-		ServletContextTemplateResolver templateResolver = new ServletContextTemplateResolver(servletContext);
-		templateResolver.setTemplateMode(TemplateMode.HTML);
-		this.templateEngine = new TemplateEngine();
-		this.templateEngine.setTemplateResolver(templateResolver);
-		templateResolver.setSuffix(".html");
-    }
-    
+        
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		doPost(request, response);
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String path = "home.html";
-		ServletContext servletContext = getServletContext(); // contesto in cui lavora il servlet
-		final WebContext ctx = new WebContext(request,response, servletContext,request.getLocale()); //oggetto in cui metti i dati che servono al template
-		
 		String title, date, time, duration, maxParticipants;
 		
+		if(request.getSession().getAttribute("user") == null) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+		}
+		
+		// parse meeting data
 		try{
 			title = Utils.sanitizeString(request.getParameter("meetingTitle"));
 			date = Utils.sanitizeString(request.getParameter("meetingDate"));
 			time = Utils.sanitizeString(request.getParameter("meetingTime"));
 			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
 			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
+			System.out.println(title+", "+date+", "+time+", "+duration+", "+maxParticipants);
 			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty() || time == null || time.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty())
-				throw new Exception("Missing fields");
+				throw new Exception();
 		}catch(Exception e) {
-			if(request.getSession().getAttribute("user") == null) {
-				response.sendError(HttpServletResponse.SC_BAD_REQUEST, "missing parameters");
-			} else {
-				ctx.setVariable("errorMsg", e.getMessage()); 
-				this.templateEngine.process(path, ctx, response.getWriter());
-			}
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Missing fields");
 			return;
 		}
+		
 		
 		System.out.println("FORM FIELDS:");
 		System.out.println(title);
@@ -81,39 +63,39 @@ public class CreateMeeting extends HttpServlet {
 		
 		Date meetingDate;
 		int maxP = 0, meetingDuration = 0;
-		
+		// validate meeting data
 		try {
 			DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			meetingDate = (Date) sdf.parse(date + " " + time);
 			meetingDuration = 90;
 			maxP = Integer.parseInt(maxParticipants);
 		} catch(NumberFormatException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid number of participants");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Invalid number of participants");
 			e.printStackTrace();
 			return;
 		} catch(IllegalArgumentException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid hour, time or duration");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Invalid hour, time or duration");
 			e.printStackTrace();
 			return;
 		} catch(ParseException e) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Parse error");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Parse error");
 			e.printStackTrace();
 			return;
 		}
 		
 		if(maxP <= 0) {
-			response.sendError(HttpServletResponse.SC_BAD_REQUEST, "You can't create a meeting with a no. of participants <= 0");
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("You can't create a meeting with a negative number of participants");
 			return;
 		}
 		
-		path = getServletContext().getContextPath() + "/inviteToMeeting";
-		response.sendRedirect(path + "?meetingtitle=" + title + "&meetingduration=" + meetingDuration
-				+ "&meetingdate=" + meetingDate.getTime() + "&maxparticipants=" + maxP);
-	}
-	
-	public void destroy() {
-		try {
-			ConnectionHandler.closeConnection(this.conn);
-		} catch (SQLException sqle) {}
+		String json = new Gson().toJson("ok");
+				
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+		response.getWriter().write(json);
 	}
 }
