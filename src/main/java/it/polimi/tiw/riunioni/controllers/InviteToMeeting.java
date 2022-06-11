@@ -22,6 +22,7 @@ import com.google.gson.Gson;
 
 import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.DAO.UserDAO;
+import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 import it.polimi.tiw.riunioni.utils.Utils;
 
@@ -47,16 +48,15 @@ public class InviteToMeeting extends HttpServlet {
 		String answer = "";
 		
 		// get input data from request
-		String title = "", date = "", time = "", duration = "", maxParticipants = "", host = "";
+		String title = "", dateTime = "", time = "", duration = "", maxParticipants = "", host = "";
 		try {
 			host = Utils.sanitizeString(request.getParameter("userId"));
 			title = Utils.sanitizeString(request.getParameter("meetingTitle"));
-			date = Utils.sanitizeString(request.getParameter("meetingDate"));
-			time = Utils.sanitizeString(request.getParameter("meetingTime"));
+			dateTime = Utils.sanitizeString(request.getParameter("meetingDateTime"));
 			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
 			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
 			
-			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty()
+			if(title == null || title.isEmpty() || dateTime == null || dateTime.isEmpty() || duration == null || duration.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty()) {
 				throw new Exception();
 			}
@@ -86,11 +86,11 @@ public class InviteToMeeting extends HttpServlet {
 		
 		// parse input data
 		Date meetingDateTime = null, meetingDuration;
-		int maxGuests = 0, hostId = 0, hours = 0, minutes = 0;
+		int maxGuests = 0, hours = 0, minutes = 0;
 		try {
-			hostId = Integer.parseInt(host);
+			dateTime = dateTime.replaceAll("T", " ");
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			meetingDateTime = (Date)sdf.parse(date + " " + time);
+			meetingDateTime = (Date)sdf.parse(dateTime + " " + time);
 			
 			sdf = new SimpleDateFormat("HH:mm");
 			meetingDuration = (Date) sdf.parse(duration);
@@ -98,13 +98,17 @@ public class InviteToMeeting extends HttpServlet {
 			minutes = meetingDuration.getMinutes();
 			
 			maxGuests = Integer.parseInt(maxParticipants);
-		} catch(NumberFormatException | ParseException e) {
-			e.printStackTrace();
+		} catch(NumberFormatException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("malformed parameters");
+			response.getWriter().println("Invalid number of participants");
+			e.printStackTrace();
+			return;
+		} catch(ParseException e) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("Invalid timestamp or duration");
+			e.printStackTrace();
 			return;
 		}
-		
 		
 		int guestDelta = selectedUserIds.size() - maxGuests;
 		// stateful checks
@@ -124,7 +128,8 @@ public class InviteToMeeting extends HttpServlet {
 			try {
 				this.conn.setAutoCommit(false);
 				int newMeetingId = meetingDao.createMeeting(title, meetingDateTime, hours + "h " + minutes + "m", maxGuests);
-				System.out.println(newMeetingId);
+				
+				int hostId = ((UserBean)request.getSession().getAttribute("user")).getId();
 				meetingDao.hostMeeting(hostId, newMeetingId);
 				
 				for(String guestId : checkedIds) {

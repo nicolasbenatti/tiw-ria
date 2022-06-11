@@ -60,13 +60,19 @@ public class RegisterUser extends HttpServlet {
 		
 		if(isUsernameDuplicate) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("the username already exists");
+			response.getWriter().println("this username already exists");
 			return;
 		}
 		
 		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 			response.getWriter().println("invalid email address");
+			return;
+		}
+		
+		if(password.length() < 8) {
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("password missing or too short (at least 8 characters)");
 			return;
 		}
 		

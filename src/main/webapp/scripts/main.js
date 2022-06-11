@@ -5,7 +5,7 @@
 
 	window.addEventListener("load", () => {
 		// redirect to login
-		if (sessionStorage.getItem("userid") == null) {
+		if (sessionStorage.getItem("username") == null) {
 			window.location.href = "register.html";
 		} else {
 			// initialize the components
@@ -19,7 +19,7 @@
 	function WelcomeMessage(usrn, messagecontainer) {
 		this.username = usrn;
 		this.show = function() {
-			messagecontainer.textContent = this.username;
+			messagecontainer.textContent = " " + this.username;
 		}
 	}
 
@@ -29,7 +29,8 @@
 		this.listContainerBody = listContainerBody;
 
 		this.reset = function() {
-			this.listContainer.style.visibility = "hidden";
+			//this.listContainer.style.visibility = "hidden";
+			this.listContainer.style.display = "none";
 		}
 
 		this.show = function() {
@@ -42,7 +43,7 @@
 							case 200: // OK
 								var meetingToShow = JSON.parse(req.responseText);
 								if (meetingToShow.length == 0) {
-									self.alert.textContent = "No Hosted Meeting yet!";
+									self.alert.textContent = "No currently hosted meetings";
 									return;
 								}
 								self.update(meetingToShow);
@@ -93,6 +94,7 @@
 
 				self.listContainerBody.appendChild(row);
 			});
+			this.listContainer.style.removeProperty("display");
 			this.listContainer.style.visibility = "visible";
 		}
 	}
@@ -103,7 +105,8 @@
 		this.listContainerBody = listContainerBody;
 
 		this.reset = function() {
-			this.listContainer.style.visibility = "hidden";
+			//this.listContainer.style.visibility = "hidden";
+			this.listContainer.style.display = "none";
 		}
 
 		this.show = function() {
@@ -116,7 +119,7 @@
 							case 200: // OK
 								var meetingsToShow = JSON.parse(req.responseText);
 								if (meetingsToShow.length == 0) {
-									self.alert.textContent = "Non hai organizzato nessun nuovo meeting";
+									self.alert.textContent = "No currently valid invitations";
 									return;
 								}
 								self.update(meetingsToShow);
@@ -163,6 +166,7 @@
 
 				self.listContainerBody.appendChild(row);
 			});
+			this.listContainer.style.removeProperty("display");
 			this.listContainer.style.visibility = "visible";
 		}
 	}
@@ -191,7 +195,7 @@
 							case 200: // OK
 								var users = JSON.parse(req.responseText);
 								if (users.length == 0) {
-									self.alert.textContent = "No registered users";
+									self.alert.textContent = "No available users";
 									return;
 								}
 								self.update(users);
@@ -240,19 +244,18 @@
 
 	function Wizard(wizardId, modalId, alert, modalAlert) {
 		var now = new Date();
-		var formattedDate = now.toISOString().substring(0, 10);
+		var formattedDate = now.toISOString().substring(0, 16);
 		this.wizard = wizardId;
 		this.modal = modalId;
 		this.alert = alert;
 		this.modalAlert = modalAlert;
 
-		this.wizard.querySelector("input[type='date']").setAttribute("min", formattedDate);
+		this.wizard.querySelector("input[type='datetime-local']").setAttribute("min", formattedDate);
 
 		this.registerEvents = function(orchestrator) {
 			var self = this;
 
 			this.modal.querySelector("input[type='button'].cancel").addEventListener("click", (e) => {
-				console.log(this.modal.querySelectorAll("input[type='checkbox']"));
 				this.modal.querySelectorAll("input[type='checkbox']").forEach(function(checkbox) {
 					checkbox.checked = false;
 				})
@@ -269,8 +272,7 @@
 									case 200: // OK
 										var maxParticipants = form.elements["maxParticipants"].value;
 										var meetingDuration = form.elements["meetingDuration"].value;
-										var meetingTime = form.elements["meetingTime"].value;
-										var meetingDate = form.elements["meetingDate"].value;
+										var meetingDateTime = form.elements["meetingDateTime"].value;
 										var meetingTitle = form.elements["meetingTitle"].value;
 
 										var invitationForm = document.getElementById("invitationForm");
@@ -289,33 +291,20 @@
 										durationInput.setAttribute("name", "meetingDuration ");
 										durationInput.setAttribute("value", meetingDuration);
 
-										var timeInput = document.createElement("input");
-										timeInput.setAttribute("type", "hidden");
-										timeInput.setAttribute("name", "meetingTime");
-										timeInput.setAttribute("value", meetingTime);
-
-										var dateInput = document.createElement("input");
-										dateInput.setAttribute("type", "hidden");
-										dateInput.setAttribute("name", "meetingDate");
-										dateInput.setAttribute("value", meetingDate);
+										var dateTimeInput = document.createElement("input");
+										dateTimeInput.setAttribute("type", "hidden");
+										dateTimeInput.setAttribute("name", "meetingDateTime");
+										dateTimeInput.setAttribute("value", meetingDateTime);
 
 										var titleInput = document.createElement("input");
 										titleInput.setAttribute("type", "hidden");
 										titleInput.setAttribute("name", "meetingTitle");
 										titleInput.setAttribute("value", meetingTitle);
 
-										// grab the id from the session
-										var hostIdInput = document.createElement("input");
-										hostIdInput.setAttribute("type", "hidden");
-										hostIdInput.setAttribute("name", "userId");
-										hostIdInput.setAttribute("value", sessionStorage.getItem("userid"));
-
 										invitationForm.appendChild(maxParticipantsInput);
 										invitationForm.appendChild(durationInput);
-										invitationForm.appendChild(timeInput);
-										invitationForm.appendChild(dateInput);
+										invitationForm.appendChild(dateTimeInput);
 										invitationForm.appendChild(titleInput);
-										invitationForm.appendChild(hostIdInput);
 
 										var modal = document.getElementById("invitationModal");
 										modal.style.display = "block";
@@ -360,7 +349,7 @@
 
 							// refresh the view
 							orchestrator.refresh();
-							this.alert.textContent = "Three attempts to host a meeting exceeding the maximum guest limit, the meeting will not be created";
+							this.alert.textContent = "Three attempts to host a meeting which exceeds the maximum guest limit, the meeting will not be created";
 						}
 						else
 							this.modalAlert.textContent = "Too many selected users, deselect at least " + numberOfDeselections;
@@ -378,7 +367,6 @@
 										case 200: // OK
 											self.modal.style.display = "none";
 											// refresh the view
-											console.log("refreshing...");
 											orchestrator.refresh();
 											break;
 										case 400: // bad request
@@ -448,7 +436,7 @@
 			wizard.registerEvents(this);
 
 			document.getElementById("logoutButton").addEventListener("click", () => {
-				window.sessionStorage.removeItem("userid");
+				window.sessionStorage.removeItem("username");
 			});
 		};
 

@@ -22,9 +22,7 @@
 						var message = x.responseText;
 						switch (x.status) {
 							case 200:
-								console.log(message);
 								var user = JSON.parse(message);
-								sessionStorage.setItem("userid", user.id);
 								sessionStorage.setItem("username", user.username);
 								window.location.href = "home.html";
 								break;

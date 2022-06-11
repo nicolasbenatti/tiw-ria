@@ -27,17 +27,16 @@ public class CreateMeeting extends HttpServlet {
     }
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String title, date, time, duration, maxParticipants;
+		String title, dateTime, time, duration, maxParticipants;
 		
 		// parse meeting data
 		try{
 			title = Utils.sanitizeString(request.getParameter("meetingTitle"));
-			date = Utils.sanitizeString(request.getParameter("meetingDate"));
-			time = Utils.sanitizeString(request.getParameter("meetingTime"));
+			dateTime = Utils.sanitizeString(request.getParameter("meetingDateTime"));
 			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
 			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
 			
-			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty() || time == null || time.isEmpty()
+			if(title == null || title.isEmpty() || dateTime == null || dateTime.isEmpty() || duration == null || duration.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty())
 				throw new Exception();
 		}catch(Exception e) {
@@ -48,8 +47,7 @@ public class CreateMeeting extends HttpServlet {
 		
 		System.out.println("FORM FIELDS:");
 		System.out.println(title);
-		System.out.println(date);
-		System.out.println(time);
+		System.out.println(dateTime);
 		System.out.println(duration);
 		System.out.println(maxParticipants);
 		
@@ -58,8 +56,9 @@ public class CreateMeeting extends HttpServlet {
 		
 		// validate meeting data
 		try {
+			dateTime = dateTime.replaceAll("T", " ");
 			DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-			meetingDate = (Date) sdf.parse(date + " " + time);
+			meetingDate = (Date) sdf.parse(dateTime);
 			
 			sdf = new SimpleDateFormat("HH:mm");
 			// throws an exception if the time is invalid
@@ -80,13 +79,13 @@ public class CreateMeeting extends HttpServlet {
 		
 		if(meetingDate.before(new Date())) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("You can't host a meeting which starts earlier than now");
+			response.getWriter().println("Meeting date can't be in the past");
 			return;
 		}
 		
 		if(maxP <= 0) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("You can't host a meeting with a negative number of participants");
+			response.getWriter().println("At least 1 participant must be present");
 			return;
 		}
 		

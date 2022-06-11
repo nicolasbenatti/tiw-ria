@@ -13,6 +13,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.beans.MeetingBean;
@@ -49,7 +50,7 @@ public class GetHostedMeetings extends HttpServlet {
 		}
 		
 		// prepare response
-		String json = new Gson().toJson(hostedMeetings);
+		String json = new GsonBuilder().setDateFormat("dd-MM-yyyy HH:mm").create().toJson(hostedMeetings);
 		
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");

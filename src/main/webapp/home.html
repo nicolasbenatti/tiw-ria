@@ -10,14 +10,14 @@
 </head>
 <body>
 	<div id="banner">
-		<span>Hi</span><span id="username"></span><span>!</span>
+		<span>Hi &nbsp;</span><span id="username"></span><span>!</span>
 		<div>
 			<a href="logout" id="logoutButton"><button>LOGOUT</button></a>
 		</div>
 	</div>
 	<!-- list hosted meetings -->
 	<div id="hostingsContainer">
-		<h4>hosted meetings</h4>
+		<h4>Hosted meetings</h4>
 		<table border="1" id="hostingsTable" class="contentTable">
 			<thead>
 				<tr>
@@ -31,7 +31,7 @@
 			</tbody>
 		</table>
 	</div>
-	<p id="hostedMeetingsAlert"></p>
+	<h5 id="hostedMeetingsAlert"></h5	>
 
 	<!-- list meetings to attend -->
 	<div id="invitationsContainer">
@@ -48,7 +48,7 @@
 			</tbody>
 		</table>
 	</div>
-	<p id="attendancesMeetingsAlert"></p>
+	<h5 id="attendancesMeetingsAlert"></h5>
 
 	<h4>Create meeting</h4>
 	<form id="createMeetingForm" action="#">
@@ -58,12 +58,8 @@
 				<td><input type="text" name="meetingTitle" required /></td>
 			</tr>
 			<tr>
-				<td><label>Date</label></td>
-				<td><input type="date" name="meetingDate" required /></td>
-			</tr>
-			<tr>
-				<td><label>Ora</label></td>
-				<td><input type="time" name="meetingTime" required /></td>
+				<td><label>Date & Time</label></td>
+				<td><input type="datetime-local" name="meetingDateTime" required /></td>
 			</tr>
 			<tr>
 				<td><label>Duration (hours:minutes)</label></td>
