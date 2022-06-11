@@ -16,3 +16,14 @@ function makeCall(method, url, formElement, cback, reset = true) {
 		formElement.reset();
 	}
 }
+
+/**
+ * returns 0 if mins < 60
+ */
+function minsToHours(mins) {
+	return Math.floor(mins / 60);
+}
+
+function hoursToMins(hours) {
+	return hours * 60;
+}

@@ -12,8 +12,9 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import it.polimi.tiw.riunioni.DAO.UserDAO;
-import it.polimi.tiw.riunioni.beans.RegisterErrorBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 import it.polimi.tiw.riunioni.utils.Utils;
@@ -22,6 +23,7 @@ import it.polimi.tiw.riunioni.utils.Utils;
 @MultipartConfig
 public class LoginUser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 	private Connection conn = null;
 
 	public LoginUser() {
@@ -33,18 +35,13 @@ public class LoginUser extends HttpServlet {
 		this.conn = ConnectionHandler.getConnection(servletContext);
 	}
 
-	protected void doPost(HttpServletRequest request, HttpServletResponse response)
-			throws ServletException, IOException {
+	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String username, password;
-		String path = "register.html";
-
-		// fill also the signup bean to avoid crashes
-		RegisterErrorBean regErrBean = new RegisterErrorBean();
 
 		try {
 			username = Utils.sanitizeString(request.getParameter("username"));
 			password = request.getParameter("password");
-			System.out.println(username + ", " + password);
+			
 			if (username == null || username.isEmpty() || password == null || password.isEmpty())
 				throw new Exception("Missing or empty credentials");
 		} catch (Exception e) {
@@ -64,17 +61,18 @@ public class LoginUser extends HttpServlet {
 			return;
 		}
 
-		// If the user exists, add info to the session and go to home page, otherwise
-		// return an error status code and message
 		if (authEsit == null) {
 			response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
 			response.getWriter().println("Wrong username or password");
 		} else {
+			// prepare response
+			String json = new Gson().toJson(authEsit);
+			
 			request.getSession().setAttribute("user", authEsit);
 			response.setStatus(HttpServletResponse.SC_OK);
 			response.setContentType("application/json");
 			response.setCharacterEncoding("UTF-8");
-			response.getWriter().println(authEsit.getUsername());
+			response.getWriter().println(json);
 		}
 	}
 

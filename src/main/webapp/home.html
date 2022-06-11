@@ -1,39 +1,33 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html>
 <head>
 <meta charset="UTF-8">
 <title>Home</title>
 <link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
-<script src="utils.js" charset="utf-8" defer></script>
-<script src="main.js" charset="utf-8" defer></script>
-<script src="modal.js" charset="utf-8" defer></script>
+<script src="scripts/utils.js" charset="utf-8" defer></script>
+<script src="scripts/main.js" charset="utf-8" defer></script>
+<script src="scripts/modal.js" charset="utf-8" defer></script>
 </head>
 <body>
+	<div id="banner">
+		<span>Hi</span><span id="username"></span><span>!</span>
+		<div>
+			<a href="logout" id="logoutButton"><button>LOGOUT</button></a>
+		</div>
+	</div>
 	<!-- list hosted meetings -->
 	<div id="hostingsContainer">
-		<h4>Here are the meetings you hosted</h4>
-		<table border="1" id="hostingsTable">
+		<h4>hosted meetings</h4>
+		<table border="1" id="hostingsTable" class="contentTable">
 			<thead>
 				<tr>
 					<th>Title</th>
 					<th>Date</th>
 					<th>Duration</th>
-					<th>Max # of guests allowed</th>
+					<th>Max. number of guests</th>
 				</tr>
 			</thead>
 			<tbody id="hostingsTableBody">
-				<tr>
-					<td>foo</td>
-					<td>foo</td>
-					<td>foo</td>
-					<td>10</td>
-				</tr>
-				<tr>
-					<td>foo</td>
-					<td>foo</td>
-					<td>foo</td>
-					<td>15</td>
-				</tr>
 			</tbody>
 		</table>
 	</div>
@@ -41,74 +35,61 @@
 
 	<!-- list meetings to attend -->
 	<div id="invitationsContainer">
-		<h4>Here are your invitations</h4>
-		<table border="1" id="attendancesTable">
+		<h4>Invitations</h4>
+		<table border="1" id="attendancesTable" class="contentTable">
 			<thead>
 				<tr>
-					<th>Title</th>
+					<th>Tile</th>
 					<th>Date</th>
 					<th>Duration</th>
-					<th>Max # of guests allowed</th>
 				</tr>
 			</thead>
 			<tbody id="attendancesTableBody">
-				<tr>
-					<td>bar</td>
-					<td>bar</td>
-					<td>bar</td>
-					<td>bar</td>
-				</tr>
-				<tr>
-					<td>bar</td>
-					<td>bar</td>
-					<td>bar</td>
-					<td>bar</td>
-				</tr>
 			</tbody>
 		</table>
 	</div>
 	<p id="attendancesMeetingsAlert"></p>
 
-	<h4>Create a new meeting</h4>
+	<h4>Create meeting</h4>
 	<form id="createMeetingForm" action="#">
 		<table>
 			<tr>
 				<td><label>Title</label></td>
-				<td><input type="text" name="meetingTitle" /></td>
+				<td><input type="text" name="meetingTitle" required /></td>
 			</tr>
 			<tr>
 				<td><label>Date</label></td>
-				<td><input type="date" name="meetingDate" /></td>
+				<td><input type="date" name="meetingDate" required /></td>
 			</tr>
 			<tr>
-				<td><label>Time</label></td>
-				<td><input type="time" name="meetingTime" /></td>
+				<td><label>Ora</label></td>
+				<td><input type="time" name="meetingTime" required /></td>
 			</tr>
 			<tr>
-				<td><label>Duration</label></td>
-				<td><input type="time" name="meetingDuration" step="60" /></td>
+				<td><label>Duration (hours:minutes)</label></td>
+				<td><input type="time" name="meetingDuration" step="60"
+					required /></td>
 			</tr>
 			<tr>
-				<td><label>Max # of guests</label></td>
-				<td><input type="number" name="maxParticipants" /></td>
+				<td><label>Max. number of guests</label></td>
+				<td><input type="number" min="1" name="maxParticipants"
+					required /></td>
 			</tr>
 		</table>
-		<input type="button" id="hostButton" value="Host Meeting" />
+		<input type="button" id="hostButton" class="host" value="Invia" />
 	</form>
-	<p id="meetingErrorMessage"></p>
+	<p id="meetingErrorMessage" class="error"></p>
 
 	<div id="invitationModal" class="modal">
 		<div class="modal-content">
 			<span class="close">&times;</span>
 			<form id="invitationForm">
-				<div id="guestList">
-				</div>
-				<input type="button" id="inviteButton" value="Invite" />
+				<div id="guestList" class="padded"></div>
+				<input type="button" class="cancel" value="Cancella" /> <input
+					type="button" class="invite" id="inviteButton" value="Invita" />
 			</form>
-			<p id="tooManyGuestsAlert"></p>
+			<p id="invitationErrors" class="error"></p>
 		</div>
 	</div>
-
-	<a href="logout">LOGOUT</a>
 </body>
 </html>

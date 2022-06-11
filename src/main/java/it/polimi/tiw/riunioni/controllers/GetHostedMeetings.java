@@ -34,38 +34,27 @@ public class GetHostedMeetings extends HttpServlet {
     }
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String path = "home.html";
-		
 		List<MeetingBean> hostedMeetings = null;
 		
-		// you must access this page through a login, otherwise an error will be displayed
-		if(request.getSession().getAttribute("user") == null) {
-			request.getSession().setAttribute("noLogin", true);
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "YOU MUST LOGIN BEFORE ACCESSING THIS PAGE");
-			return;
-		}
-
-		request.getSession().setAttribute("noLogin", false);
+		// fetch data
 		MeetingDAO meetDao = new MeetingDAO(this.conn);
 		try {
 			int userId = ((UserBean)request.getSession().getAttribute("user")).getId();
 			hostedMeetings = meetDao.getMeetingsHostedByUser(userId);
 		} catch(SQLException e) {
 			e.printStackTrace();
-			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Not possible to retrieve meetings from DB");
+			response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Couldn't retrieve meetings from DB");
+			return;
 		}
 		
+		// prepare response
 		String json = new Gson().toJson(hostedMeetings);
 		
 		response.setStatus(HttpServletResponse.SC_OK);
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().println(json);
-	}
-	
-	@Override
-	protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-		doGet(req, resp);
 	}
 	
 	public void destroy() {

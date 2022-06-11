@@ -17,6 +17,20 @@
 		<param-name>dbDriver</param-name>
 		<param-value>com.mysql.cj.jdbc.Driver</param-value>
 	</context-param>
+	<filter>
+		<filter-name>LoginChecker</filter-name>
+		<filter-class>it.polimi.tiw.riunioni.filters.LoginChecker</filter-class>
+	</filter>
+	<filter-mapping>
+		<filter-name>LoginChecker</filter-name>
+		<url-pattern>/home</url-pattern>
+		<url-pattern>/logout</url-pattern>
+		<url-pattern>/createMeeting</url-pattern>
+		<url-pattern>/inviteToMeeting</url-pattern>
+		<url-pattern>/getHostedMeetings</url-pattern>
+		<url-pattern>/getAttendedMeetings</url-pattern>
+		<url-pattern>/getUsers</url-pattern>
+	</filter-mapping>
 	<welcome-file-list>
 		<welcome-file>register.html</welcome-file>
 	</welcome-file-list>

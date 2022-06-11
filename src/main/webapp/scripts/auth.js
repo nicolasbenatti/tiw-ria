@@ -1,26 +1,31 @@
 
-(function() { // avoid variables ending up in the global scope
-
+(function() {
 	// === utility functions & constants ===
-	
 	const REGEX_VALIDATE_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 	
 	function isEmailValid(email) {
 		var regex = new RegExp(REGEX_VALIDATE_EMAIL);
 		return regex.test(email);	
 	}
+	
+	function isPasswordValid(password) {
+		return password.length >= 8;
+	}
 
-	document.getElementById("loginButton").addEventListener('click', (e) => {
+	document.getElementById("loginButton").addEventListener("click", (e) => {
 		var form = e.target.closest("form");
-		console.log(form);
+
 		if (form.checkValidity()) {
-			makeCall("POST", 'login', form,
+			makeCall("POST", "login", form,
 				function(x) {
 					if (x.readyState == XMLHttpRequest.DONE) {
 						var message = x.responseText;
 						switch (x.status) {
 							case 200:
-								sessionStorage.setItem('username', message);
+								console.log(message);
+								var user = JSON.parse(message);
+								sessionStorage.setItem("userid", user.id);
+								sessionStorage.setItem("username", user.username);
 								window.location.href = "home.html";
 								break;
 							case 400: // bad request
@@ -34,61 +39,59 @@
 								break;
 						}
 					}
-				}
-			);
+				}, false);
 		} else {
 			form.reportValidity();
 		}
 	});
 	
-	document.getElementById("signupButton").addEventListener('click', (e) => {
+	document.getElementById("signupButton").addEventListener("click", (e) => {
 		var form = e.target.closest("form");
-		console.log(form);
 		
 		// take form input
 		let email = form.elements["email"].value;
 		let password = form.elements["password"].value;
 		let pwConfirmation = form.elements["passwordConfirmation"].value;
-		
-		console.log(email);
-		console.log(password);
-		console.log(pwConfirmation);
-		
-		let validEmail = (email.length != 0) ? isEmailValid(email) : true;
+
+		// null or empty fields will be signaled by the server
+		let validEmail = isEmailValid(email);
+		let validPassword = isPasswordValid(password);
 		let passwordsMatch = (password === pwConfirmation);
 		
-		if (form.checkValidity() && validEmail && passwordsMatch) {
-			makeCall("POST", 'register', form,
+		if (form.checkValidity() && validEmail && validPassword && passwordsMatch) {
+			makeCall("POST", "register", form,
 				function(x) {
 					if (x.readyState == XMLHttpRequest.DONE) {
 						var message = x.responseText;
 						switch (x.status) {
 							case 200:
 								sessionStorage.setItem('username', message);
-								//window.location.href = "register.html";
 								document.getElementById("signupSuccess").textContent = message;
+								document.getElementById("signupErrors").textContent = "";
 								break;
 							case 400: // bad request
+								document.getElementById("signupSuccess").textContent = "";
 								document.getElementById("signupErrors").textContent = message;
 								break;
 							case 401: // unauthorized
+								document.getElementById("signupSuccess").textContent = "";
 								document.getElementById("signupErrors").textContent = message;
 								break;
-							case 500: // server error
+							case 500: // internal server error
+								document.getElementById("signupSuccess").textContent = "";
 								document.getElementById("signupErrors").textContent = message;
 								break;
 						}
 					}
-				}
-			);
+				}, false);
+		} else if (!validEmail) {
+			document.getElementById("signupErrors").textContent = "malformed email address";
+		} else if(!validPassword) {
+			document.getElementById("signupErrors").textContent = "password missing or too short (at least 8 characters)";
+		} else if(!passwordsMatch) {
+			document.getElementById("signupErrors").textContent = "passwords don't match";
 		} else {
 			form.reportValidity();
-			if(!validEmail) {
-				document.getElementById("signupErrors").textContent = "malformed email address";
-			} else if(!passwordsMatch) {
-				document.getElementById("signupErrors").textContent = "passwords don't match";
-			}
 		}
 	});
-	
 })();

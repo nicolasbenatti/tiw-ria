@@ -22,13 +22,14 @@ import com.google.gson.Gson;
 
 import it.polimi.tiw.riunioni.DAO.MeetingDAO;
 import it.polimi.tiw.riunioni.DAO.UserDAO;
-import it.polimi.tiw.riunioni.beans.MeetingBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
+import it.polimi.tiw.riunioni.utils.Utils;
 
 @WebServlet("/inviteToMeeting")
 @MultipartConfig
 public class InviteToMeeting extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 	private Connection conn = null;
 	private int attempts;
    
@@ -43,17 +44,17 @@ public class InviteToMeeting extends HttpServlet {
     }
     
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		boolean readyToInsert = false;
+		String answer = "";
 		
 		// get input data from request
-		String title = "", date = "", duration = "", maxParticipants = "";
+		String title = "", date = "", time = "", duration = "", maxParticipants = "", host = "";
 		try {
-			title = request.getParameter("meetingTitle");
-			date = request.getParameter("meetingDate");
-			duration = request.getParameter("meetingDuration");
-			maxParticipants = request.getParameter("maxParticipants");
-			
-			System.out.println(title+", "+date+", "+duration+", "+maxParticipants);
+			host = Utils.sanitizeString(request.getParameter("userId"));
+			title = Utils.sanitizeString(request.getParameter("meetingTitle"));
+			date = Utils.sanitizeString(request.getParameter("meetingDate"));
+			time = Utils.sanitizeString(request.getParameter("meetingTime"));
+			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
+			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
 			
 			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty()) {
@@ -66,15 +67,10 @@ public class InviteToMeeting extends HttpServlet {
 		}
 		
 		List<String> checkedIds = Arrays.asList(request.getParameterValues("users"));
-		System.out.println("******");
-		for(String sel : checkedIds)
-			System.out.println(sel);
-		System.out.println("******");
-		
-		// check that all the IDs are present in the DB
-		UserDAO userDao = new UserDAO(this.conn);
 		List<Integer> selectedUserIds = new ArrayList<>();
 		
+		// check that all the IDs are present in the DB
+		UserDAO userDao = new UserDAO(this.conn);		
 		try {
 			for(String idString : checkedIds) {
 				int id = Integer.parseInt(idString);
@@ -89,12 +85,18 @@ public class InviteToMeeting extends HttpServlet {
 		}
 		
 		// parse input data
-		Date meetingDate = null;
-		int meetingDuration = 0, maxGuests = 0;
+		Date meetingDateTime = null, meetingDuration;
+		int maxGuests = 0, hostId = 0, hours = 0, minutes = 0;
 		try {
-			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
-			meetingDate = (Date)sdf.parse(date);
-			meetingDuration = Integer.parseInt(duration);
+			hostId = Integer.parseInt(host);
+			SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			meetingDateTime = (Date)sdf.parse(date + " " + time);
+			
+			sdf = new SimpleDateFormat("HH:mm");
+			meetingDuration = (Date) sdf.parse(duration);
+			hours = meetingDuration.getHours();
+			minutes = meetingDuration.getMinutes();
+			
 			maxGuests = Integer.parseInt(maxParticipants);
 		} catch(NumberFormatException | ParseException e) {
 			e.printStackTrace();
@@ -103,58 +105,49 @@ public class InviteToMeeting extends HttpServlet {
 			return;
 		}
 		
-		int guestDelta = 0;
+		
+		int guestDelta = selectedUserIds.size() - maxGuests;
 		// stateful checks
-		if(selectedUserIds.size() > maxGuests) {
-			guestDelta = selectedUserIds.size() - maxGuests;
+		if(guestDelta > 0) {
 			if(attempts == 3) {
 				attempts = 0;
-				// prompt client to redirect
-			} else
+				answer = "Too many attempts, the meeting won't be created";
+			} else {
 				attempts++;
-			
-			System.out.println("ATTEMPT #" + attempts);
+				answer = "Too many users invited, deselect at least " + guestDelta;
+			}
 		} else {
-			// insert meeting and guests in the DB
-			// note: this is a transaction in which both the meeting data and the 
-			// guests are inserted atomically, in order not to leave the DB
+			// insert meeting, host and guests in the DB
+			// note: this is done within a transaction, in order not to leave the DB
 			// in an inconsistent state
 			MeetingDAO meetingDao = new MeetingDAO(this.conn);
 			try {
 				this.conn.setAutoCommit(false);
-				meetingDao.hostMeeting(title, meetingDate, meetingDuration, maxGuests);
-				int newMeetingId = meetingDao.getIdFromName(title);
+				int newMeetingId = meetingDao.createMeeting(title, meetingDateTime, hours + "h " + minutes + "m", maxGuests);
+				System.out.println(newMeetingId);
+				meetingDao.hostMeeting(hostId, newMeetingId);
+				
 				for(String guestId : checkedIds) {
 					meetingDao.inviteUserToMeeting(Integer.parseInt(guestId), newMeetingId);
 				}
 				this.conn.commit();
 			} catch(SQLException e) {
+				answer = "couldn't insert meeting in DB";
 				try {
 					this.conn.rollback();
 				} catch(SQLException e1) {
-					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Can't rollback transaction");
+					response.sendError(HttpServletResponse.SC_INTERNAL_SERVER_ERROR, "Couldn't rollback transaction");
 					return;
 				}
 			}
 			
-			readyToInsert = true;
-		}
-		
-		String answer;
-		if(!readyToInsert) {
-			answer = "Troppi utenti selezionati, eliminarne almeno " + guestDelta;
-		} else {
 			answer = "ok";
 		}
 		
 		String json = new Gson().toJson(answer);
-		response.setContentType("a.pplication/json");
+		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().write(json);
-	}
-	
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
 	}
 	
 	public void destroy() {

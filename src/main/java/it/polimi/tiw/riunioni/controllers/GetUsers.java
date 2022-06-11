@@ -19,12 +19,11 @@ import it.polimi.tiw.riunioni.DAO.UserDAO;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 
-/**
- * Servlet implementation class GetUsers
- */
+
 @WebServlet("/getUsers")
 public class GetUsers extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 	private Connection conn = null;
    
     public GetUsers() {
@@ -37,14 +36,16 @@ public class GetUsers extends HttpServlet {
     }
     
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// check that all the IDs are present in the DB
-		UserDAO userDao = new UserDAO(this.conn);
-		
 		List<UserBean> users = new ArrayList<>();
+
+		UserDAO userDao = new UserDAO(this.conn);
 		try {
 			users = userDao.getAllUsersExcept(((UserBean)request.getSession().getAttribute("user")).getId());
 		}catch(SQLException e) {
 			e.printStackTrace();
+			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+			response.getWriter().println("Couldn't retrieve users from DB");
+			return;
 		}
 		
 		String json = new Gson().toJson(users);
@@ -53,10 +54,6 @@ public class GetUsers extends HttpServlet {
 		response.setContentType("application/json");
 		response.setCharacterEncoding("UTF-8");
 		response.getWriter().println(json);
-	}
-	
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doGet(request, response);
 	}
 	
 	public void destroy() {

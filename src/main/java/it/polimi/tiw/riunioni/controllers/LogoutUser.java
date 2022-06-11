@@ -24,5 +24,4 @@ public class LogoutUser extends HttpServlet {
 		String path = getServletContext().getContextPath() +  "/register.html";
 		response.sendRedirect(path);
 	}
-
 }

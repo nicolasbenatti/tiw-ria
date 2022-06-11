@@ -2,10 +2,10 @@
 <html>
 <head>
 <meta charset="UTF-8">
-	<title>Sign in / Sign up</title>
-	<link rel="stylesheet" type="text/css" media="all" href="css/style.css"/>
-	<script src="utils.js" charset="utf-8" defer></script>
-	<script src="loginManagement.js" charset="utf-8" defer></script>
+<title>Sign in / Sign up</title>
+<link rel="stylesheet" type="text/css" media="all" href="css/style.css" />
+<script src="scripts/utils.js" charset="utf-8" defer></script>
+<script src="scripts/auth.js" charset="utf-8" defer></script>
 </head>
 <body>
 	<div id="loginFormContainer">
@@ -14,43 +14,43 @@
 			<table>
 				<tr>
 					<td><label>Username</label></td>
-					<td><input type="text" name="username"/></td>
+					<td><input type="text" name="username" required/></td>
 				</tr>
 				<tr>
 					<td><label>Password</label></td>
-					<td><input type="password" name="password"/></td>
+					<td><input type="password" name="password" required/></td>
 				</tr>
 			</table>
-			<input type="button" id="loginButton" value="Sign in"/>
+			<input type="button" id="loginButton" value="Sign in" />
 		</form>
-		<p id="errorMessage"></p>
+		<p id="errorMessage" class="error"></p>
 	</div>
-	
+
 	<div id="signupFormContainer">
 		<h3>Sign up</h3>
 		<form id="registerForm" action="#">
 			<table>
 				<tr>
 					<td><label>Username</label></td>
-					<td><input type="text" name="username"/></td>
+					<td><input type="text" name="username" required/></td>
 				</tr>
 				<tr>
 					<td><label>E-mail</label></td>
-					<td><input type="text" name="email"/></td>
+					<td><input type="text" name="email" required/></td>
 				</tr>
 				<tr>
 					<td><label>Password</label></td>
-					<td><input type="password" name="password"/><br/></td>
+					<td><input type="password" name="password" required/><br /></td>
 				</tr>
 				<tr>
 					<td><label>Repeat Password</label></td>
-					<td><input type="password" name="passwordConfirmation"/></td>
+					<td><input type="password" name="passwordConfirmation" required/></td>
 				</tr>
 			</table>
-			<input type="button" id="signupButton" value="Sign up"/>
+			<input type="button" id="signupButton" value="Sign up" />
 		</form>
-		<p id="signupErrors"></p>
-		<p id="signupSuccess"></p>
+		<p id="signupErrors" class="error"></p>
+		<p id="signupSuccess" class="success"></p>
 	</div>
 </body>
 </html>

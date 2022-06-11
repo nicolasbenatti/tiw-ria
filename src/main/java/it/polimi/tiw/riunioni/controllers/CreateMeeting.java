@@ -25,17 +25,9 @@ public class CreateMeeting extends HttpServlet {
     public CreateMeeting() {
         super();
     }
-        
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		doPost(request, response);
-	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		String title, date, time, duration, maxParticipants;
-		
-		if(request.getSession().getAttribute("user") == null) {
-			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
-		}
 		
 		// parse meeting data
 		try{
@@ -44,7 +36,7 @@ public class CreateMeeting extends HttpServlet {
 			time = Utils.sanitizeString(request.getParameter("meetingTime"));
 			duration = Utils.sanitizeString(request.getParameter("meetingDuration"));
 			maxParticipants = Utils.sanitizeString(request.getParameter("maxParticipants"));
-			System.out.println(title+", "+date+", "+time+", "+duration+", "+maxParticipants);
+			
 			if(title == null || title.isEmpty() || date == null || date.isEmpty() || duration == null || duration.isEmpty() || time == null || time.isEmpty()
 					|| maxParticipants == null || maxParticipants.isEmpty())
 				throw new Exception();
@@ -54,29 +46,29 @@ public class CreateMeeting extends HttpServlet {
 			return;
 		}
 		
-		
 		System.out.println("FORM FIELDS:");
 		System.out.println(title);
 		System.out.println(date);
+		System.out.println(time);
 		System.out.println(duration);
 		System.out.println(maxParticipants);
 		
-		Date meetingDate;
-		int maxP = 0, meetingDuration = 0;
+		Date meetingDate = null, meetingDuration = null;
+		int maxP = 0;
+		
 		// validate meeting data
 		try {
 			DateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			meetingDate = (Date) sdf.parse(date + " " + time);
-			meetingDuration = 90;
+			
+			sdf = new SimpleDateFormat("HH:mm");
+			// throws an exception if the time is invalid
+			sdf.parse(duration);
+			
 			maxP = Integer.parseInt(maxParticipants);
 		} catch(NumberFormatException e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Invalid number of participants");
-			e.printStackTrace();
-			return;
-		} catch(IllegalArgumentException e) {
-			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("Invalid hour, time or duration");
 			e.printStackTrace();
 			return;
 		} catch(ParseException e) {
@@ -86,9 +78,15 @@ public class CreateMeeting extends HttpServlet {
 			return;
 		}
 		
+		if(meetingDate.before(new Date())) {
+			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
+			response.getWriter().println("You can't host a meeting which starts earlier than now");
+			return;
+		}
+		
 		if(maxP <= 0) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
-			response.getWriter().println("You can't create a meeting with a negative number of participants");
+			response.getWriter().println("You can't host a meeting with a negative number of participants");
 			return;
 		}
 		

@@ -4,12 +4,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
 import it.polimi.tiw.riunioni.beans.UserBean;
-
 
 public class UserDAO {
 	
@@ -20,38 +18,21 @@ public class UserDAO {
 	}
 	
 	public List<UserBean> getAllUsersExcept(int userid) throws SQLException {
-		List<UserBean> users = new ArrayList<UserBean>();
-		ResultSet res = null;
-		PreparedStatement pstatement = null;
 		String query = "SELECT * FROM users WHERE user_id <> ?";
+		List<UserBean> users = new ArrayList<UserBean>();
 		
-		try {
-			pstatement = this.conn.prepareStatement(query);
+		try (PreparedStatement pstatement = this.conn.prepareStatement(query);) {
 			pstatement.setInt(1, userid);
-			res = pstatement.executeQuery();
-			while(res.next()) {
-				UserBean user = new UserBean();
-				user.setId(res.getInt("user_id"));
-				user.setUsername(res.getString("username"));
-				user.setEmail(res.getString("email"));
-				user.setPassword(res.getString("user_password"));
-				
-				users.add(user);
-			}
-		} catch(SQLException e) {
-			throw new SQLException(e);
-		}
-		finally {
-			try {
-				res.close();
-			} catch(Exception e1) {
-				e1.printStackTrace();
-			}
-			
-			try {
-				pstatement.close();
-			} catch(Exception e2) {
-				e2.printStackTrace();
+			try (ResultSet resSet = pstatement.executeQuery();) {
+				while(resSet.next()) {
+					UserBean user = new UserBean();
+					user.setId(resSet.getInt("user_id"));
+					user.setUsername(resSet.getString("username"));
+					user.setEmail(resSet.getString("email"));
+					user.setPassword(resSet.getString("user_password"));
+					
+					users.add(user);
+				}
 			}
 		}
 		
@@ -60,24 +41,14 @@ public class UserDAO {
 	
 	public int createUser(UserBean user) throws SQLException {
 		String query = "INSERT INTO users(username, email, user_password) VALUES(?, ?, ?)";
-		PreparedStatement pstatement = null;
 		int esit = 0;
 		
-		try {
-			pstatement = this.conn.prepareStatement(query);
+		try (PreparedStatement pstatement = this.conn.prepareStatement(query);) {
 			pstatement.setString(1, user.getUsername());
 			pstatement.setString(2, user.getEmail());
 			pstatement.setString(3, user.getPassword());
 
 			esit = pstatement.executeUpdate();
-		} catch(SQLException e) {
-			throw new SQLException(e);
-		} finally {
-			try {
-				pstatement.close();
-			} catch(Exception e) {
-				e.printStackTrace();
-			}
 		}
 		
 		return esit;
@@ -85,29 +56,12 @@ public class UserDAO {
 	
 	public boolean isUsernameAlreadyPresent(String username) throws SQLException {
 		String query = "SELECT * FROM users WHERE username = ?";
-		PreparedStatement pstatement = null;
-		ResultSet res = null;
 		boolean isResultSetEmpty;
 	
-		try {
-			pstatement = this.conn.prepareStatement(query);
+		try (PreparedStatement pstatement = this.conn.prepareStatement(query);) {
 			pstatement.setString(1, username);
-			
-			res = pstatement.executeQuery();
-			isResultSetEmpty = !res.isBeforeFirst();
-		} catch(SQLException e) {
-			throw new SQLException(e);
-		} finally {
-			try {
-				res.close();
-			} catch(Exception e1) {
-				e1.printStackTrace();
-			}
-			
-			try {
-				pstatement.close();
-			} catch(Exception e2) {
-				e2.printStackTrace();
+			try (ResultSet resSet = pstatement.executeQuery();) {
+				isResultSetEmpty = !resSet.isBeforeFirst();
 			}
 		}
 	
@@ -139,29 +93,12 @@ public class UserDAO {
 	
 	public boolean checkUserid(int userid) throws SQLException {
 		String query = "SELECT * FROM users WHERE EXISTS (SELECT * FROM users WHERE user_id = ?)";
-		PreparedStatement pstatement = null;
-		ResultSet resSet = null;
 		boolean isIdPresent = false;
 		
-		try {
-			pstatement = this.conn.prepareStatement(query);
+		try (PreparedStatement pstatement = this.conn.prepareStatement(query);) {
 			pstatement.setInt(1, userid);
-			
-			resSet = pstatement.executeQuery();
-			isIdPresent = resSet.isBeforeFirst();
-		} catch(SQLException e) {
-			throw new SQLException(e);
-		} finally {
-			try {
-				resSet.close();
-			} catch(Exception e1) {
-				e1.printStackTrace();
-			}
-			
-			try {
-				pstatement.close();
-			} catch(Exception e2) {
-				e2.printStackTrace();
+			try (ResultSet resSet = pstatement.executeQuery();) {
+				isIdPresent = resSet.isBeforeFirst();
 			}
 		}
 		

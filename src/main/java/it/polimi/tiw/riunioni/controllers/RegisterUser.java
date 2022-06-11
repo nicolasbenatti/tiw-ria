@@ -22,6 +22,7 @@ import it.polimi.tiw.riunioni.utils.Utils;
 @MultipartConfig
 public class RegisterUser extends HttpServlet {
 	private static final long serialVersionUID = 1L;
+	
 	private static final String REGEX_VALIDATE_EMAIL = "^[a-zA-Z0-9_!#$%&'*+/=?`{|}~^.-]+@[a-zA-Z0-9.-]+$";
 	private Connection conn = null;
 	
@@ -40,8 +41,6 @@ public class RegisterUser extends HttpServlet {
 		String password = request.getParameter("password");
 		String confirmation = Utils.sanitizeString(request.getParameter("passwordConfirmation"));
 		
-		System.out.println(username + ", " + email + ", " + password + ", " + confirmation);
-		
 		if(username == null || username.isEmpty() || email == null || email.isEmpty() || password == null 
 				|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
@@ -49,6 +48,7 @@ public class RegisterUser extends HttpServlet {
 			return;
 		}
 		
+		// check for errors
 		UserDAO userDao = new UserDAO(this.conn);
 		boolean isUsernameDuplicate = false;
 		
@@ -76,6 +76,7 @@ public class RegisterUser extends HttpServlet {
 			return;
 		}
 		
+		// insert the new user in the DB
 		UserBean newUser = new UserBean(username, email, password);
 		int created = 0;
 		
