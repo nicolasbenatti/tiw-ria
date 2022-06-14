@@ -33,10 +33,12 @@
 				<tr>
 					<td><label>Username</label></td>
 					<td><input type="text" name="username" required/></td>
+					<td><span id="duplicateUsernameError" class="error"></span></td>
 				</tr>
 				<tr>
 					<td><label>E-mail</label></td>
 					<td><input type="text" name="email" required/></td>
+					<td><span id="invalidEmailError" class="error"></span></td>
 				</tr>
 				<tr>
 					<td><label>Password</label></td>
@@ -45,6 +47,7 @@
 				<tr>
 					<td><label>Repeat Password</label></td>
 					<td><input type="password" name="passwordConfirmation" required/></td>
+					<td><span id="passwordMismatchError" class="error"></span></td>
 				</tr>
 			</table>
 			<input type="button" id="signupButton" value="Sign up" />

@@ -29,7 +29,6 @@
 		this.listContainerBody = listContainerBody;
 
 		this.reset = function() {
-			//this.listContainer.style.visibility = "hidden";
 			this.listContainer.style.display = "none";
 		}
 
@@ -105,7 +104,6 @@
 		this.listContainerBody = listContainerBody;
 
 		this.reset = function() {
-			//this.listContainer.style.visibility = "hidden";
 			this.listContainer.style.display = "none";
 		}
 

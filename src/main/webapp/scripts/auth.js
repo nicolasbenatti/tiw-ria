@@ -63,9 +63,12 @@
 						var message = x.responseText;
 						switch (x.status) {
 							case 200:
-								sessionStorage.setItem('username', message);
+								sessionStorage.setItem("username", message);
 								document.getElementById("signupSuccess").textContent = message;
 								document.getElementById("signupErrors").textContent = "";
+								document.getElementById("duplicateUsernameError").textContent = "";
+								document.getElementById("invalidEmailError").textContent = "";
+								document.getElementById("passwordMismatchError").textContent = "";
 								break;
 							case 400: // bad request
 								document.getElementById("signupSuccess").textContent = "";
@@ -76,18 +79,22 @@
 								document.getElementById("signupErrors").textContent = message;
 								break;
 							case 500: // internal server error
+								var errorBean = JSON.parse(message);
 								document.getElementById("signupSuccess").textContent = "";
-								document.getElementById("signupErrors").textContent = message;
+								document.getElementById("signupErrors").textContent = errorBean.missingEntries;
+								document.getElementById("duplicateUsernameError").textContent = errorBean.notUniqueUsername;
+								document.getElementById("invalidEmailError").textContent = errorBean.invalidEmail;
+								document.getElementById("passwordMismatchError").textContent = errorBean.passwordMismatch;
 								break;
 						}
 					}
 				}, false);
 		} else if (!validEmail) {
-			document.getElementById("signupErrors").textContent = "malformed email address";
+			document.getElementById("invalidEmailError").textContent = "malformed email address";
 		} else if(!validPassword) {
-			document.getElementById("signupErrors").textContent = "password missing or too short (at least 8 characters)";
+			document.getElementById("passwordMismatchError").textContent = "password missing or too short (at least 8 characters)";
 		} else if(!passwordsMatch) {
-			document.getElementById("signupErrors").textContent = "passwords don't match";
+			document.getElementById("passwordMismatchError").textContent = "passwords don't match";
 		} else {
 			form.reportValidity();
 		}

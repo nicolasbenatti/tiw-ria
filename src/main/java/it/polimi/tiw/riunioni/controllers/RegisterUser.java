@@ -13,7 +13,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.google.gson.Gson;
+
 import it.polimi.tiw.riunioni.DAO.UserDAO;
+import it.polimi.tiw.riunioni.beans.SignupErrorBean;
 import it.polimi.tiw.riunioni.beans.UserBean;
 import it.polimi.tiw.riunioni.utils.ConnectionHandler;
 import it.polimi.tiw.riunioni.utils.Utils;
@@ -36,13 +39,20 @@ public class RegisterUser extends HttpServlet {
 	}
 
 	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		String username = Utils.sanitizeString(request.getParameter("username"));
-		String email = Utils.sanitizeString(request.getParameter("email"));
-		String password = request.getParameter("password");
-		String confirmation = Utils.sanitizeString(request.getParameter("passwordConfirmation"));
-		
-		if(username == null || username.isEmpty() || email == null || email.isEmpty() || password == null 
-				|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
+		SignupErrorBean errorBean = new SignupErrorBean();
+
+		String username = "", email = "", password = "", confirmation = "";
+		try {
+			username = Utils.sanitizeString(request.getParameter("username"));
+			email = Utils.sanitizeString(request.getParameter("email"));
+			password = request.getParameter("password");
+			confirmation = Utils.sanitizeString(request.getParameter("passwordConfirmation"));
+			
+			if(username == null || username.isEmpty() || email == null || email.isEmpty() || password == null 
+					|| password.isEmpty() || confirmation == null || confirmation.isEmpty()) {
+				throw new Exception();
+			}
+		} catch(Exception e) {
 			response.setStatus(HttpServletResponse.SC_BAD_REQUEST);
 			response.getWriter().println("Missing fields");
 			return;
@@ -50,7 +60,7 @@ public class RegisterUser extends HttpServlet {
 		
 		// check for errors
 		UserDAO userDao = new UserDAO(this.conn);
-		boolean isUsernameDuplicate = false;
+		boolean isUsernameDuplicate = false, errors = false;
 		
 		try {
 			isUsernameDuplicate = userDao.isUsernameAlreadyPresent(username);
@@ -59,26 +69,34 @@ public class RegisterUser extends HttpServlet {
 		}
 		
 		if(isUsernameDuplicate) {
+			errors = true;
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("this username already exists");
-			return;
+			errorBean.setNotUniqueUsername("this username already exists");
 		}
 		
 		if(!Pattern.compile(REGEX_VALIDATE_EMAIL).matcher(email).matches()) {
+			errors = true;
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("invalid email address");
-			return;
+			errorBean.setInvalidEmail("invalid email address");
 		}
 		
 		if(password.length() < 8) {
+			errors = true;
 			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("password missing or too short (at least 8 characters)");
-			return;
+			errorBean.setPasswordMismatch("password missing or too short (at least 8 characters)");
+		} else {
+			if(!password.equals(confirmation)) {
+				errors = true;
+				response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+				errorBean.setPasswordMismatch("passwords don't match");
+			}
 		}
 		
-		if(!password.equals(confirmation)) {
-			response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-			response.getWriter().println("passwords don't match");
+		if(errors) {
+			response.setContentType("application/json");
+			response.setCharacterEncoding("UTF-8");
+			String json = new Gson().toJson(errorBean);
+			response.getWriter().println(json);
 			return;
 		}
 		
